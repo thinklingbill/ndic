@@ -8,11 +8,11 @@ Description: Renders the canvas for the NDIC plugin app
 
 function ndicPage () {
    ?>
- <div id=ndicTitle>New Day in Christ Devotional Calendar Management</div>
+ <div class=ndic_app_title>New Day in Christ Devotional Calendar Management</div>
 
- <div id=ndicMenu></div>
+ <div id=ndic_Menu></div>
 
- <div id=ndicActionCanvas></div>  
+ <div id=ndic_ActionCanvas></div>  
 
    <?php
 }
