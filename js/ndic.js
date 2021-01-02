@@ -1,3 +1,5 @@
+// TODO - REMOVE HARDCODING FROM AJAX SERVICES
+
 //
 ///////////////////////////////
 // global variables
@@ -91,7 +93,7 @@ function eventMenuFacilitiesList() {
       jQuery("#ndic_facilitiesList").show();
       jQuery("#ndic_facilitiesEntry").hide();
 
-      setupEvent( "#ndic_newFacilityBtn", "click", eventMenuFacilitiesEntry);
+      setupEvent( "#ndic_newFacilityBtn", "click", eventMenuFacilitiesEntry)
    }
 
 }
@@ -110,6 +112,7 @@ function eventMenuFacilitiesEntry() {
       jQuery("#ndic_facilitiesTable").hide();
       jQuery("#ndic_facilitiesAddNewButton").hide();
       jQuery("#ndic_facilitiesEntry").show();
+      setupEvent("#ndic_facilityAddBtn", "click", eventFacilityAdd);
    }
 }
 
@@ -158,7 +161,8 @@ function renderFacilitiesEntry() {
             <div class=ndic_form_row><span class=ndic_form_label>Chaplain:</span><input id=ndic_facilityChaplain class=ndic_form_entry></input></div> \
             <div class=ndic_form_row><span class=ndic_form_label>Telephone:</span><input id=ndic_facilityTelephone class=ndic_form_entry>Telephone Template</input></div> \
             <div class=ndic_form_row><input type=checkbox id=ndic_facilityDontSend></input><span class=ndic_form_label>Don't send devotionals to this facility</span></div> \
-            <div class=ndic_button_row><button class=ndic_button id=ndic_facilityAddBtn>Add Facility</button> <button class=ndic_button id=ndic_facilityAddCancelBtn>Cancel</button><div> \
+            <div class=ndic_button_row><button class=ndic_button id=ndic_facilityAddBtn>Add Facility</button> \
+            <button class=ndic_button id=ndic_facilityAddCancelBtn>Cancel</button><div> \
             <div class=ndic_form_label>* = Required</div> \
          </div> \
       </div> \
@@ -168,12 +172,43 @@ function renderFacilitiesEntry() {
    return html;
 }
 
+function eventFacilityAdd() {
+   console.log( "eventFacilityAdd");
+
+   // validate that the facility data is good
+
+   // call the service to add facility data
+   jQuery.ajax({
+      method: "POST",
+      url: "/ndic_wp/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+      data: { service: "addFacility",
+              ndic_facilityName : jQuery( "#ndic_facilityName").val(),
+              ndic_facilityAlias01 : jQuery( "#ndic_facilityAlias01").val(),
+              ndic_facilityAlias02 : jQuery( "#ndic_facilityAlias02").val(),
+              ndic_facilityAlias03 : jQuery( "#ndic_facilityAlias03").val(),
+              ndic_facilityAlias04: jQuery( "#ndic_facilityAlias04").val(),
+              ndic_facilityType : jQuery( "#ndic_facilityType" ).val(),
+              ndic_facilityAddress01 : jQuery( "#ndic_facilityAddress01").val(),
+              ndic_facilityAddress02 : jQuery( "#ndic_facilityAddress02").val(),
+              ndic_facilityCity : jQuery( "#ndic_facilityCity").val(),
+              ndic_facilityState : jQuery( "#ndic_facilityState").val(),
+              ndic_facilityZipCode : jQuery( "#ndic_facilityZipCode").val(),
+              ndic_facilityWarden : jQuery( "#ndic_facilityWarden").val(),
+              ndic_facilityChaplain : jQuery( "#ndic_facilityChaplain").val(),
+              ndic_facilityTelephone : jQuery( "#ndic_facilityTelephone").val(),
+              ndic_facilityDontSend: jQuery('#ndic_facilityDontSend').is(':checked'),
+            }
+   })
+   .done( function(json){
+      console.log( json );
+   });
+}
 
 ///////////////////////////////
 // utility functions
 ///////////////////////////////
 function setupEvent(id, eventType, handler) {
-   console.log("setupEvent");
+   console.log("setupEvent for " + id);
    // unset the event if it already exists
    jQuery(id).off(eventType, handler);
 
