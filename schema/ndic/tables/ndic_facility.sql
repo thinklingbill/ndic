@@ -1,10 +1,14 @@
--- DROP TABLE IF EXISTS wp_ndic_facility;
+DROP TABLE IF EXISTS ndic_wp.wp_ndic_facility;
 
-CREATE TABLE `wp_ndic_facility` (
+CREATE TABLE `ndic_wp`.`wp_ndic_facility` (
   `facility_id` int NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
   `type` char(1) NOT NULL DEFAULT '',
-  `address_id` int NOT NULL DEFAULT '0',
+  `address_01` varchar(128) DEFAULT NULL,
+  `address_02` varchar(128) DEFAULT NULL,
+  `city` varchar(128) DEFAULT NULL,
+  `state` varchar(10) DEFAULT NULL,
+  `zip_code` varchar(10) DEFAULT NULL,
   `warden_name` varchar(128) DEFAULT NULL,
   `chaplain_name` varchar(128) DEFAULT NULL,
   `phone` varchar(10) DEFAULT NULL,
@@ -22,8 +26,8 @@ CREATE TABLE `wp_ndic_facility` (
 
 ALTER TABLE `wp_ndic_facility`
   ADD PRIMARY KEY (`facility_id`),
-  ADD KEY `deleted_flag` (`deleted_flag`),
-  ADD KEY `address_id` (`address_id`);
+  ADD KEY `deleted_flag` (`deleted_flag`)
+;
 
 ALTER TABLE `wp_ndic_facility`
   MODIFY `facility_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
