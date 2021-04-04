@@ -11,7 +11,7 @@ CREATE TABLE `ndic_wp`.`wp_ndic_facility` (
   `zip_code` varchar(10) DEFAULT NULL,
   `warden_name` varchar(128) DEFAULT NULL,
   `chaplain_name` varchar(128) DEFAULT NULL,
-  `phone` varchar(10) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
   `alias_01` varchar(10) DEFAULT NULL,
   `alias_02` varchar(10) DEFAULT NULL,
   `alias_03` varchar(10) DEFAULT NULL,

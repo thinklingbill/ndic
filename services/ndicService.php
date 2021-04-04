@@ -14,6 +14,10 @@ switch( $requestedService ) {
         addFacility();
         break;
 
+    case "getFacilities" :
+        getFacilities();
+        break;
+
     default :
         // error message would go here
         echo json_encode( array("status"=>"error", "message"=>"unknown service requested") );
@@ -118,5 +122,56 @@ function addFacility() {
         
         echo json_encode( array( "status" => $status, "message" => $errorMessage ) );
     }
-}   
+} 
+
+function getFacilities() {
+
+    $conn = getConnection();
+
+    if ( !$conn ) {
+        echo errorResponse();
+        return;
+    }  
+
+    $array = array();
+
+    try {   
+
+        $sql= "
+        SELECT * FROM ndic_wp.wp_ndic_facility
+        ";
+
+         $stmt = $conn->prepare( $sql );
+
+         if ( !$stmt ) {
+            throw new Exception( $conn->error, $conn->errNo );
+        }
+
+         $stmt->execute();
+
+         if ( $conn->error ) {
+             throw new Exception( $conn->error, $conn->errNo );
+         }
+
+        $result = $stmt->get_result();
+        
+        while( $line = $result->fetch_array(MYSQLI_ASSOC)) {
+            array_push($array,$line);
+        }
+        $status = "OK";
+
+        $stmt->close();
+
+        array_unshift( $array, array( "status" => $status, "message" => "successful"));
+   
+    }
+    catch ( Exception $e ) {
+        $status = "ERROR";
+        $errorMessage = $e->getMessage();
+    
+        array_unshift( $array, array( "status" => $status, "message" => $errorMessage ) );
+    }
+
+    echo json_encode( $array );
+}
 ?>

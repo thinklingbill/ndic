@@ -28,7 +28,11 @@ function my_admin_menu() {
 	add_action( 'admin_menu', 'my_admin_menu' );
 
 	// load the javascript with jquery support
-	wp_enqueue_script('ndic', "/wp-content/plugins/ndic_devotional_calendar/js/ndic.js", array('jquery'), null, true);	
+	wp_register_script( "js-mask"
+		, "/wp-content/plugins/ndic_devotional_calendar/js/jQuery-Mask-Plugin-master/src/jquery.mask.js"
+		, array('jquery'));
+	
+	wp_enqueue_script('ndic', "/wp-content/plugins/ndic_devotional_calendar/js/ndic.js", array('jquery','js-mask'), null, true);
 
 	wp_enqueue_style( 'ndic', "/wp-content/plugins/ndic_devotional_calendar/styles/ndic.css" );
 ?>

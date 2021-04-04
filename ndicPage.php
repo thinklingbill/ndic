@@ -11,8 +11,9 @@ function ndicPage () {
  <div class=ndic_app_title>New Day in Christ Devotional Calendar Management</div>
 
  <div id=ndic_Menu></div>
+ <div id=ndic_Message></div>
 
- <div id=ndic_ActionCanvas></div>  
+ <div id=ndic_ActionCanvas>ACTION CANVAS</div>  
 
    <?php
 }
