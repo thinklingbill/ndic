@@ -62,7 +62,7 @@ function addFacility() {
         }
 
         $sql= "
-        INSERT INTO ndic_wp.wp_ndic_facility
+        INSERT INTO ndic.wp_ndic_facility
         (name,
          type,
          address_01,
@@ -138,7 +138,7 @@ function getFacilities() {
     try {   
 
         $sql= "
-        SELECT * FROM ndic_wp.wp_ndic_facility
+        SELECT * FROM ndic.wp_ndic_facility
         ";
 
          $stmt = $conn->prepare( $sql );

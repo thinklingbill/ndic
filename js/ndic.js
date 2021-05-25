@@ -1,4 +1,5 @@
 // TODO - REMOVE HARDCODING FROM AJAX SERVICES
+// REMOVE HARDCODING OF ROOT FOLDER
 
 //
 ///////////////////////////////
@@ -198,7 +199,7 @@ function renderFacilitiesTable() {
 
    jQuery.ajax({
       method: "POST",
-      url: "/ndic_wp/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+      url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
       data: { service: "getFacilities",
             }
    })
@@ -211,17 +212,44 @@ function renderFacilitiesTable() {
          setError( res[0].message )
       }
       else {
-         var html = "<table>";
-         html += "<tr>"
-         html += "<th>Name</th>";
-         html += "<th>Address 1</th>";
-         html += "</tr>"
-         for ( var i=0; i < res.length; i++ ) {
+         var html = "<table class='ndic_table'>";
+         html += "<thead>";
+         html += "<tr>";
+         html += "<th></th>";
+         html += "<th>Facility Name</th>";
+         html += "<th>Type</th>";
+         html += "<th>Address</th>";
+         html += "<th>City</th>";
+         html += "<th>State</th>";
+         html += "<th>Zip Code</th>";
+         html += "<th>Aliases</th>";
+         html += "<th>No Devotionals?</th>";
+         html += "<th>Warden</th>";
+         html += "<th>Chaplain</th>";
+         html += "<th>Phone</th>";
+         html += "</tr>";
+         html += "</thead>";
+         html += "<tbody>";
+         for ( var i=1; i < res.length; i++ ) {
             html += "<tr>";
+            html += "<td>edit | delete</td>";            
             html += "<td>" + res[i].name + "</td>";
-            html += "<td>" + res[i].address_01 + "</td>";
+            html += "<td>" + res[i].type + "</td>";
+            html += "<td>" + res[i].address_01 + " " 
+                           + res[i].address_02 + "</td>";
+            html += "<td>" + res[i].city + "</td>";
+            html += "<td>" + res[i].state + "</td>";
+            html += "<td>" + res[i].zip_code + "</td>";
+            html += "<td>" + res[i].alias_01 + " "
+                           + res[i].alias_02 + " "
+                           + res[i].alias_03 +"</td>";
+            html += "<td>" + res[i].devotional_send_disallowed_flag + "</td>";
+            html += "<td>" + res[i].warden_name + "</td>";
+            html += "<td>" + res[i].chaplain_name + "</td>";                           
+            html += "<td>" + res[i].phone + "</td>";            
             html += "</tr>";
          }
+         html += "</tbody>";
          html += "</table>";
 
          jQuery( "#ndic_facilitiesTable" ).html( html );
@@ -239,7 +267,7 @@ function eventFacilityAdd() {
    actionStarted();
    jQuery.ajax({
       method: "POST",
-      url: "/ndic_wp/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+      url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
       data: { service: "addFacility",
               ndic_facilityName : jQuery( "#ndic_facilityName").val(),
               ndic_facilityAlias01 : jQuery( "#ndic_facilityAlias01").val(),
@@ -266,7 +294,7 @@ function eventFacilityAdd() {
       console.log( res );
 
       if ( res.status != "OK") {
-         setError( res[0].message )
+         setError( res.message )
       }
       else {
          renderFacilitiesTable();

@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS ndic_wp.wp_ndic_facility;
+DROP TABLE IF EXISTS ndic.wp_ndic_facility;
 
-CREATE TABLE `ndic_wp`.`wp_ndic_facility` (
+CREATE TABLE `ndic`.`wp_ndic_facility` (
   `facility_id` int NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
   `type` char(1) NOT NULL DEFAULT '',
