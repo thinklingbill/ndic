@@ -1,3 +1,12 @@
+/* ids */
+#ndic_ActionCanvas {
+}
+
+#ndic_Message {
+   height: 2em;
+}
+
+/* application styles */
 .ndic_app_title {
    font-weight: bold;
    font-size: 2em;
@@ -5,6 +14,18 @@
    margin-bottom: 1em;
 }
 
+.ndic_page_title {
+   font-size: 1.4em;
+   margin-top: 0.25em;
+   margin-bottom: 0.25em;
+}
+
+.ndic_align_right {
+   display: inline-block;
+   text-align: right;
+}
+
+/* menu styles */
 .ndic_menu {
    border: 1px solid black;
    padding-top: 0.5em;
@@ -16,15 +37,7 @@
    padding-right: 1em;
 }
 
-#ndic_ActionCanvas {
-   border: 1px dashed black;
-}
-
-#ndic_Message {
-   border: 1px dashed blue;
-   height: 2em;
-}
-
+/* table styles */
 /* from: https://dev.to/dcodeyt/creating-beautiful-html-tables-with-css-428l
 */
 .ndic_table {
@@ -69,4 +82,31 @@
 .ndic_table tbody tr.active-row {
    font-weight: bold;
    color: #009879;
+}
+
+/* form styles */
+.ndic_form_row {
+   margin-bottom: 2px;
+}
+
+.ndic_form_label {
+   display: inline-block;
+   width: 100px;
+}
+
+.ndic_form_entry_big {
+   width: 400px;
+}
+
+.ndic_form_entry_medium {
+   width: 200px;
+}
+
+.ndic_form_entry_small {
+   width: 95px;
+}
+
+/* filter styles */
+.ndic_filter {
+   display: inline-block;
 }

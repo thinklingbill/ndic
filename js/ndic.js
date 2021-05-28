@@ -40,6 +40,7 @@ function eventMenuRequests() {
    console.log("eventMenuRequests");
    if (okToSwitch()) {
       actionStarted();
+      highlightMenu();
       actionEnded();
    }
 }
@@ -48,6 +49,7 @@ function eventMenuFacilities() {
    console.log("eventMenuFacilities");
    if (okToSwitch()) {
       actionStarted();
+      highlightMenu();
       renderFacilitiesPage();
       actionEnded();
    }
@@ -61,19 +63,18 @@ function renderFacilitiesPage() {
    console.log( "renderFacilitiesPage");
 
    jQuery("#ndic_ActionCanvas").html(
-      renderFacilitiesList() +
-       "<div id=ndic_facilitiesMerge>FACILITY MERGE</div> \
+       "<div id=ndic_facilitiesEntry></div> \
+        <div id=ndic_facilitiesList></div> \
+        <div id=ndic_facilitiesMerge></div> \
       " );
-
-   jQuery("#ndic_facilitiesList").hide();
-   jQuery("#ndic_facilitiesMerge").hide();
 
    // setup field masks
    jQuery('.ndic_phone').mask('(000) 000-0000');
    jQuery('.ndic_zip_code').mask('00000-ZZZZ', {translation:  {'Z': {pattern: /[0-9]/, optional: true}}});
 
    renderFacilitiesSubMenu();
-   renderFacilitiesTable();
+
+   eventMenuFacilitiesList();
 }
 
 function renderFacilitiesSubMenu() {
@@ -95,28 +96,32 @@ function facilitiesSubMenuEventSetup() {
    setupEvent("#ndic_menuFacilitiesMerge", "click", eventMenuFacilitiesMerge);
 }
 
+function highlightMenu() {
+   console.log( "highlightMenu STUB");
+}
+
+// Menu events
 function eventMenuFacilitiesList() {
    console.log("eventMenuFacilitiesList");
 
    if (okToSwitch()) {
       actionStarted();
-
-      jQuery("#ndic_facilitiesMerge").hide();
-
-      jQuery("#ndic_facilitiesList").show();
+      highlightMenu();
+      renderFacilitiesList();
+      jQuery("#ndic_facilitiesAddNewButton").show();
       jQuery("#ndic_facilitiesEntry").hide();
-
+      jQuery("#ndic_facilitiesList").show();
+      jQuery("#ndic_facilitiesMerge").hide();
       setupEvent( "#ndic_newFacilityBtn", "click", eventMenuFacilitiesEntry);
-
       actionEnded();
    }
-
 }
 
 function eventMenuFacilitiesMerge() {
    console.log("eventMenuFacilitiesMerge");
    if (okToSwitch()) {
       actionStarted();
+      highlightMenu();
       jQuery("#ndic_facilitiesMerge").show();
       jQuery("#ndic_facilitiesList").hide();
       actionEnded();
@@ -125,44 +130,52 @@ function eventMenuFacilitiesMerge() {
 
 function eventMenuFacilitiesEntry() {
    console.log("eventMenuFacilitiesEntry");
+
    if (okToSwitch()) {
       actionStarted();
+      highlightMenu();
+      renderFacilitiesEntry();
       jQuery("#ndic_facilitiesAddNewButton").hide();
       jQuery("#ndic_facilitiesEntry").show();
+      jQuery("#ndic_facilitiesList").hide();
       setupEvent("#ndic_facilityAddBtn", "click", eventFacilityAdd);
       actionEnded();
    }
 }
 
+// render functions
 function renderFacilitiesList() {
    console.log("renderFacilitiesList");   
  
-   var html = " \
-   <div id=ndic_facilitiesList> \
+   jQuery( "#ndic_facilitiesList").html( " \
+   <div id=> \
+      <div class=ndic_filter>Filter by State: \
+            <select id=ndic_filterState>" + stateDropDown(true, false) + "</select></div> \
       <div class=ndic_page_title>Facility Administration</div> \
       <div id=ndic_facilitiesAddNewButton> \
          <button class=ndic_button id=ndic_newFacilityBtn>Add New Facility</button> \
-      </div> "
-      + renderFacilitiesEntry() +
-   "</div> \
-   <div id=ndic_facilitiesTable>FACILITIES TABLE</div> \
-   ";
+      </div> \
+      <div class=ndic_action_link_label>Extract this data to Excel</div> \
+      <div id=ndic_facilitiesTable></div> \
+   </div> \
+   " );
 
-   return html;
+   renderFacilitiesTable();
 }
 
 function renderFacilitiesEntry() {
    console.log("renderFacilitiesEntry");   
-   var html = " \
+
+   jQuery("#ndic_facilitiesEntry").html( " \
       <div id=ndic_facilitiesEntry> \
          <div class=ndic_page_title>Add a Correctional Facility</div> \
          <div id=ndic_facilityForm> \
-            <div class=ndic_form_row><span class=ndic_form_label>Facility Name:</span><input id=ndic_facilityName class=ndic_form_entry></input> *</div> \
+            <div class=ndic_form_row><span class=ndic_form_label>Facility Name:</span> <input id=ndic_facilityName class=ndic_form_entry_big></input> *</div> \
             <div class=ndic_form_row><span class=ndic_form_label>Aliases:</span> \
-               <input id=ndic_facilityAlias01 class=ndic_form_entry></input> \
-               <input id=ndic_facilityAlias02 class=ndic_form_entry></input> \
-               <input id=ndic_facilityAlias03 class=ndic_form_entry></input> \
-               <input id=ndic_facilityAlias04 class=ndic_form_entry></input> \
+               <input id=ndic_facilityAlias01 class=ndic_form_entry_small></input> \
+               <input id=ndic_facilityAlias02 class=ndic_form_entry_small></input> \
+               <input id=ndic_facilityAlias03 class=ndic_form_entry_small></input> \
+               <input id=ndic_facilityAlias04 class=ndic_form_entry_small></input> \
             </div> \
             <div class=ndic_form_row><span class=ndic_form_label>Type:</span> \
                <select id=ndic_facilityType> \
@@ -171,30 +184,26 @@ function renderFacilitiesEntry() {
                   <option value='L'>Local</option> \
                </select>\
             </div> \
-            <div class=ndic_form_row><span class=ndic_form_label>Address 1:</span><input id=ndic_facilityAddress01 class=ndic_form_entry></input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>Address 2:</span><input id=ndic_facilityAddress02 class=ndic_form_entry></input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>City:</span><input id=ndic_facilityCity class=ndic_form_entry></input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>State:</span><input id=ndic_facilityState class=ndic_form_entry>Turn into dropdown</input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>Zip Code:</span><input id=ndic_facilityZipCode class='ndic_form_entry ndic_zip_code'>Zip code template</input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>Warden:</span><input id=ndic_facilityWarden class=ndic_form_entry></input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>Chaplain:</span><input id=ndic_facilityChaplain class=ndic_form_entry></input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>Telephone:</span><input id=ndic_facilityTelephone class='ndic_form_entry ndic_phone'>Telephone Template</input></div> \
-            <div class=ndic_form_row><input type=checkbox id=ndic_facilityDontSend></input><span class=ndic_form_label>Don't send devotionals to this facility</span></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>Address 1:</span> <input id=ndic_facilityAddress01 class=ndic_form_entry_big></input></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>Address 2:</span> <input id=ndic_facilityAddress02 class=ndic_form_entry_big></input></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>City:</span> <input id=ndic_facilityCity class=ndic_form_entry_medium></input></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>State:</span> <select id=ndic_facilityState class=ndic_form_entry_medium>" + stateDropDown(false,true) + "</select></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>Zip Code:</span> <input id=ndic_facilityZipCode class='ndic_form_entry_small ndic_zip_code'>Zip code template</input></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>Warden:</span> <input id=ndic_facilityWarden class=ndic_form_entry_medium></input></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>Chaplain:</span> <input id=ndic_facilityChaplain class=ndic_form_entry_medium></input></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>Telephone:</span> <input id=ndic_facilityTelephone class='ndic_form_entry_small ndic_phone'>Telephone Template</input></div> \
+            <div class=ndic_form_row><span class=ndic_form_label></span><span class=ndic_form_entry_big> <input type=checkbox id=ndic_facilityDontSend></input> Don't send devotionals to this facility</span></div> \
             <div class=ndic_button_row><button class=ndic_button id=ndic_facilityAddBtn>Add Facility</button> \
-            <button class=ndic_button id=ndic_facilityAddCancelBtn>Cancel</button><div> \
+            <button class=ndic_button id=ndic_facilityAddCancelBtn>Cancel</button></div> \
             <div class=ndic_form_label>* = Required</div> \
          </div> \
       </div> \
-   </div> \
-   ";
-
-   return html;
+   " );
 }
 
 function renderFacilitiesTable() {
    console.log("renderFacilitiesTable");
    
-   var html = "JOJO BARNES";
    actionStarted();
 
    jQuery.ajax({
@@ -205,7 +214,7 @@ function renderFacilitiesTable() {
    })
    .done( function(json){
       actionEnded();
-      console.log( json );
+      //console.log( json );
       res  = JSON.parse( json );
 
       if ( res[0].status != "OK") {
@@ -255,9 +264,9 @@ function renderFacilitiesTable() {
          jQuery( "#ndic_facilitiesTable" ).html( html );
       }
    });
-
 }
 
+// button events
 function eventFacilityAdd() {
    console.log( "eventFacilityAdd");
 
@@ -288,19 +297,88 @@ function eventFacilityAdd() {
    })
    .done( function(json){
       actionEnded();
-      console.log( json );
+      //console.log( json );
       res  = JSON.parse( json );
 
-      console.log( res );
+      //console.log( res );
 
       if ( res.status != "OK") {
          setError( res.message )
       }
       else {
-         renderFacilitiesTable();
+         eventMenuFacilitiesList()
       }
 
    });
+}
+
+///////////////////////////////
+// dropdowns
+///////////////////////////////
+function stateDropDown( includeAllOption, includeSelectOption ) {
+   var html = "";
+
+   if ( includeAllOption ) {
+      html += "<option value='ALL'>All States</option>";
+   }
+
+   if ( includeSelectOption ) {
+      html += "<option value=''>[Select a State]</option>";
+   }
+
+   html += "<option value='AL'>AL - Alabama</option> \
+   <option value='AK'>AK - Alaska</option> \
+   <option value='AZ'>AZ - Arizona</option> \
+   <option value='AR'>AR - Arkansas</option> \
+   <option value='CA'>CA - California</option> \
+   <option value='CO'>CO - Colorado</option> \
+   <option value='CT'>CT - Connecticut</option> \
+   <option value='DE'>DE - Delaware</option> \
+   <option value='DC'>DC - District of Columbia</option> \
+   <option value='FL'>FL - Florida</option> \
+   <option value='GA'>GA - Georgia</option> \
+   <option value='HI'>HI - Hawaii</option> \
+   <option value='ID'>ID - Idaho</option> \
+   <option value='IL'>IL - Illinois</option> \
+   <option value='IN'>IN - Indiana</option> \
+   <option value='IA'>IA - Iowa</option> \
+   <option value='KS'>KS - Kansas</option> \
+   <option value='KY'>KY - Kentucky</option> \
+   <option value='LA'>LA - Louisiana</option> \
+   <option value='ME'>ME - Maine</option> \
+   <option value='MD'>MD - Maryland</option> \
+   <option value='MA'>MA - Massachusetts</option> \
+   <option value='MI'>MI - Michigan</option> \
+   <option value='MN'>MN - Minnesota</option> \
+   <option value='MS'>MS - Mississippi</option> \
+   <option value='MO'>MO - Missouri</option> \
+   <option value='MT'>MT - Montana</option> \
+   <option value='NE'>NE - Nebraska</option> \
+   <option value='NV'>NV - Nevada</option> \
+   <option value='NH'>NH - New Hampshire</option> \
+   <option value='NJ'>NJ - New Jersey</option> \
+   <option value='NM'>NM - New Mexico</option> \
+   <option value='NY'>NY - New York</option> \
+   <option value='NC'>NC - North Carolina</option> \
+   <option value='ND'>ND - North Dakota</option> \
+   <option value='OH'>OH - Ohio</option> \
+   <option value='OK'>OK - Oklahoma</option> \
+   <option value='OR'>OR - Oregon</option> \
+   <option value='PA'>PA - Pennsylvania</option> \
+   <option value='RI'>RI - Rhode Island</option> \
+   <option value='SC'>SC - South Carolina</option> \
+   <option value='SD'>SD - South Dakota</option> \
+   <option value='TN'>TN - Tennessee</option> \
+   <option value='TX'>TX - Texas</option> \
+   <option value='UT'>UT - Utah</option> \
+   <option value='VT'>VT - Vermont</option> \
+   <option value='VA'>VA - Virginia</option> \
+   <option value='WA'>WA - Washington</option> \
+   <option value='WV'>WV - West Virginia</option> \
+   <option value='WI'>WI - Wisconsin</option> \
+   <option value='WY'>WY - Wyoming</option>";
+
+   return html;
 }
 
 ///////////////////////////////
