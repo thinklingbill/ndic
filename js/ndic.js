@@ -38,20 +38,29 @@ function menuEventSetup() {
 
 function eventMenuRequests() {
    console.log("eventMenuRequests");
+   clearMessage();
    if (okToSwitch()) {
       actionStarted();
       highlightMenu();
       actionEnded();
    }
+   else {
+      notifyPleaseSaveChanges();
+   }
 }
 
 function eventMenuFacilities() {
    console.log("eventMenuFacilities");
+   clearMessage();
+
    if (okToSwitch()) {
       actionStarted();
       highlightMenu();
       renderFacilitiesPage();
       actionEnded();
+   }
+   else {
+      notifyPleaseSaveChanges();
    }
 }
 
@@ -60,17 +69,17 @@ function eventMenuFacilities() {
 // Facility functions
 ///////////////////////////////
 function renderFacilitiesPage() {
-   console.log( "renderFacilitiesPage");
+   console.log("renderFacilitiesPage");
 
    jQuery("#ndic_ActionCanvas").html(
-       "<div id=ndic_facilitiesEntry></div> \
+      "<div id=ndic_facilitiesEntry></div> \
         <div id=ndic_facilitiesList></div> \
         <div id=ndic_facilitiesMerge></div> \
       " );
 
    // setup field masks
    jQuery('.ndic_phone').mask('(000) 000-0000');
-   jQuery('.ndic_zip_code').mask('00000-ZZZZ', {translation:  {'Z': {pattern: /[0-9]/, optional: true}}});
+   jQuery('.ndic_zip_code').mask('00000-ZZZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
 
    renderFacilitiesSubMenu();
 
@@ -97,12 +106,13 @@ function facilitiesSubMenuEventSetup() {
 }
 
 function highlightMenu() {
-   console.log( "highlightMenu STUB");
+   console.log("highlightMenu STUB");
 }
 
 // Menu events
 function eventMenuFacilitiesList() {
    console.log("eventMenuFacilitiesList");
+   clearMessage();
 
    if (okToSwitch()) {
       actionStarted();
@@ -112,13 +122,18 @@ function eventMenuFacilitiesList() {
       jQuery("#ndic_facilitiesEntry").hide();
       jQuery("#ndic_facilitiesList").show();
       jQuery("#ndic_facilitiesMerge").hide();
-      setupEvent( "#ndic_newFacilityBtn", "click", eventMenuFacilitiesEntry);
+      setupEvent("#ndic_newFacilityBtn", "click", eventMenuFacilitiesEntry);
       actionEnded();
+   }
+   else {
+      notifyPleaseSaveChanges();
    }
 }
 
 function eventMenuFacilitiesMerge() {
    console.log("eventMenuFacilitiesMerge");
+   clearMessage();
+
    if (okToSwitch()) {
       actionStarted();
       highlightMenu();
@@ -126,10 +141,14 @@ function eventMenuFacilitiesMerge() {
       jQuery("#ndic_facilitiesList").hide();
       actionEnded();
    }
+   else {
+      notifyPleaseSaveChanges();
+   }
 }
 
 function eventMenuFacilitiesEntry() {
    console.log("eventMenuFacilitiesEntry");
+   clearMessage();
 
    if (okToSwitch()) {
       actionStarted();
@@ -139,15 +158,34 @@ function eventMenuFacilitiesEntry() {
       jQuery("#ndic_facilitiesEntry").show();
       jQuery("#ndic_facilitiesList").hide();
       setupEvent("#ndic_facilityAddBtn", "click", eventFacilityAdd);
+      setupEvent("#ndic_facilityCancelBtn", "click", eventFacilityCancel);
       actionEnded();
    }
+   else {
+      notifyPleaseSaveChanges();
+   }
+}
+
+function eventFacilitiesChange() {
+   console.log("eventFacilitiesChange");
+   clearMessage();
+
+   _unsavedData = true;
+}
+
+
+function eventClearFacilitiesChange() {
+   console.log("eventClearFacilitiesChange");
+   clearMessage();
+
+   _unsavedData = false;
 }
 
 // render functions
 function renderFacilitiesList() {
-   console.log("renderFacilitiesList");   
- 
-   jQuery( "#ndic_facilitiesList").html( " \
+   console.log("renderFacilitiesList");
+
+   jQuery("#ndic_facilitiesList").html(" \
    <div id=> \
       <div class=ndic_filter>Filter by State: \
             <select id=ndic_filterState>" + stateDropDown(true, false) + "</select></div> \
@@ -164,9 +202,9 @@ function renderFacilitiesList() {
 }
 
 function renderFacilitiesEntry() {
-   console.log("renderFacilitiesEntry");   
+   console.log("renderFacilitiesEntry");
 
-   jQuery("#ndic_facilitiesEntry").html( " \
+   jQuery("#ndic_facilitiesEntry").html(" \
       <div id=ndic_facilitiesEntry> \
          <div class=ndic_page_title>Add a Correctional Facility</div> \
          <div id=ndic_facilityForm> \
@@ -187,142 +225,171 @@ function renderFacilitiesEntry() {
             <div class=ndic_form_row><span class=ndic_form_label>Address 1:</span> <input id=ndic_facilityAddress01 class=ndic_form_entry_big></input></div> \
             <div class=ndic_form_row><span class=ndic_form_label>Address 2:</span> <input id=ndic_facilityAddress02 class=ndic_form_entry_big></input></div> \
             <div class=ndic_form_row><span class=ndic_form_label>City:</span> <input id=ndic_facilityCity class=ndic_form_entry_medium></input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>State:</span> <select id=ndic_facilityState class=ndic_form_entry_medium>" + stateDropDown(false,true) + "</select></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>State:</span> <select id=ndic_facilityState class=ndic_form_entry_medium>" + stateDropDown(false, true) + "</select></div> \
             <div class=ndic_form_row><span class=ndic_form_label>Zip Code:</span> <input id=ndic_facilityZipCode class='ndic_form_entry_small ndic_zip_code'>Zip code template</input></div> \
             <div class=ndic_form_row><span class=ndic_form_label>Warden:</span> <input id=ndic_facilityWarden class=ndic_form_entry_medium></input></div> \
             <div class=ndic_form_row><span class=ndic_form_label>Chaplain:</span> <input id=ndic_facilityChaplain class=ndic_form_entry_medium></input></div> \
             <div class=ndic_form_row><span class=ndic_form_label>Telephone:</span> <input id=ndic_facilityTelephone class='ndic_form_entry_small ndic_phone'>Telephone Template</input></div> \
             <div class=ndic_form_row><span class=ndic_form_label></span><span class=ndic_form_entry_big> <input type=checkbox id=ndic_facilityDontSend></input> Don't send devotionals to this facility</span></div> \
             <div class=ndic_button_row><button class=ndic_button id=ndic_facilityAddBtn>Add Facility</button> \
-            <button class=ndic_button id=ndic_facilityAddCancelBtn>Cancel</button></div> \
+            <button class=ndic_button id=ndic_facilityCancelBtn>Cancel</button></div> \
             <div class=ndic_form_label>* = Required</div> \
          </div> \
       </div> \
    " );
+
+   setupEvent("#ndic_facilitiesEntry input", "change", eventFacilitiesChange)
 }
 
 function renderFacilitiesTable() {
    console.log("renderFacilitiesTable");
-   
+
    actionStarted();
 
    jQuery.ajax({
       method: "POST",
       url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
-      data: { service: "getFacilities",
-            }
+      data: {
+         service: "getFacilities",
+      }
    })
-   .done( function(json){
-      actionEnded();
-      //console.log( json );
-      res  = JSON.parse( json );
+      .done(function (json) {
+         actionEnded();
+         //console.log( json );
+         res = JSON.parse(json);
 
-      if ( res[0].status != "OK") {
-         setError( res[0].message )
-      }
-      else {
-         var html = "<table class='ndic_table'>";
-         html += "<thead>";
-         html += "<tr>";
-         html += "<th></th>";
-         html += "<th>Facility Name</th>";
-         html += "<th>Type</th>";
-         html += "<th>Address</th>";
-         html += "<th>City</th>";
-         html += "<th>State</th>";
-         html += "<th>Zip Code</th>";
-         html += "<th>Aliases</th>";
-         html += "<th>No Devotionals?</th>";
-         html += "<th>Warden</th>";
-         html += "<th>Chaplain</th>";
-         html += "<th>Phone</th>";
-         html += "</tr>";
-         html += "</thead>";
-         html += "<tbody>";
-         for ( var i=1; i < res.length; i++ ) {
-            html += "<tr>";
-            html += "<td>edit | delete</td>";            
-            html += "<td>" + res[i].name + "</td>";
-            html += "<td>" + res[i].type + "</td>";
-            html += "<td>" + res[i].address_01 + " " 
-                           + res[i].address_02 + "</td>";
-            html += "<td>" + res[i].city + "</td>";
-            html += "<td>" + res[i].state + "</td>";
-            html += "<td>" + res[i].zip_code + "</td>";
-            html += "<td>" + res[i].alias_01 + " "
-                           + res[i].alias_02 + " "
-                           + res[i].alias_03 +"</td>";
-            html += "<td>" + res[i].devotional_send_disallowed_flag + "</td>";
-            html += "<td>" + res[i].warden_name + "</td>";
-            html += "<td>" + res[i].chaplain_name + "</td>";                           
-            html += "<td>" + res[i].phone + "</td>";            
-            html += "</tr>";
+         if (res[0].status != "OK") {
+            setError(res[0].message)
          }
-         html += "</tbody>";
-         html += "</table>";
+         else {
+            var html = "<table class='ndic_table'>";
+            html += "<thead>";
+            html += "<tr>";
+            html += "<th></th>";
+            html += "<th>Facility Name</th>";
+            html += "<th>Type</th>";
+            html += "<th>Address</th>";
+            html += "<th>City</th>";
+            html += "<th>State</th>";
+            html += "<th>Zip Code</th>";
+            html += "<th>Aliases</th>";
+            html += "<th>No Devotionals?</th>";
+            html += "<th>Warden</th>";
+            html += "<th>Chaplain</th>";
+            html += "<th>Phone</th>";
+            html += "</tr>";
+            html += "</thead>";
+            html += "<tbody>";
+            for (var i = 1; i < res.length; i++) {
+               html += "<tr>";
+               html += "<td>edit | delete</td>";
+               html += "<td>" + res[i].name + "</td>";
+               html += "<td>" + res[i].type + "</td>";
+               html += "<td>" + res[i].address_01 + " "
+                  + res[i].address_02 + "</td>";
+               html += "<td>" + res[i].city + "</td>";
+               html += "<td>" + res[i].state + "</td>";
+               html += "<td>" + res[i].zip_code + "</td>";
+               html += "<td>" + res[i].alias_01 + " "
+                  + res[i].alias_02 + " "
+                  + res[i].alias_03 + "</td>";
+               html += "<td>" + res[i].devotional_send_disallowed_flag + "</td>";
+               html += "<td>" + res[i].warden_name + "</td>";
+               html += "<td>" + res[i].chaplain_name + "</td>";
+               html += "<td>" + res[i].phone + "</td>";
+               html += "</tr>";
+            }
+            html += "</tbody>";
+            html += "</table>";
 
-         jQuery( "#ndic_facilitiesTable" ).html( html );
-      }
-   });
+            jQuery("#ndic_facilitiesTable").html(html);
+         }
+      });
 }
 
 // button events
 function eventFacilityAdd() {
-   console.log( "eventFacilityAdd");
+   console.log("eventFacilityAdd");
 
    // validate that the facility data is good
+   if (validateFacilityData()) {
+      // call the service to add facility data
+      actionStarted();
+      jQuery.ajax({
+         method: "POST",
+         url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+         data: {
+            service: "addFacility",
+            ndic_facilityName: jQuery("#ndic_facilityName").val(),
+            ndic_facilityAlias01: jQuery("#ndic_facilityAlias01").val(),
+            ndic_facilityAlias02: jQuery("#ndic_facilityAlias02").val(),
+            ndic_facilityAlias03: jQuery("#ndic_facilityAlias03").val(),
+            ndic_facilityAlias04: jQuery("#ndic_facilityAlias04").val(),
+            ndic_facilityType: jQuery("#ndic_facilityType").val(),
+            ndic_facilityAddress01: jQuery("#ndic_facilityAddress01").val(),
+            ndic_facilityAddress02: jQuery("#ndic_facilityAddress02").val(),
+            ndic_facilityCity: jQuery("#ndic_facilityCity").val(),
+            ndic_facilityState: jQuery("#ndic_facilityState").val(),
+            ndic_facilityZipCode: jQuery("#ndic_facilityZipCode").val(),
+            ndic_facilityWarden: jQuery("#ndic_facilityWarden").val(),
+            ndic_facilityChaplain: jQuery("#ndic_facilityChaplain").val(),
+            ndic_facilityTelephone: jQuery("#ndic_facilityTelephone").val(),
+            ndic_facilityDontSend: jQuery('#ndic_facilityDontSend').is(':checked'),
+         }
+      })
+         .done(function (json) {
+            actionEnded();
+            //console.log( json );
+            res = JSON.parse(json);
 
-   // call the service to add facility data
-   actionStarted();
-   jQuery.ajax({
-      method: "POST",
-      url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
-      data: { service: "addFacility",
-              ndic_facilityName : jQuery( "#ndic_facilityName").val(),
-              ndic_facilityAlias01 : jQuery( "#ndic_facilityAlias01").val(),
-              ndic_facilityAlias02 : jQuery( "#ndic_facilityAlias02").val(),
-              ndic_facilityAlias03 : jQuery( "#ndic_facilityAlias03").val(),
-              ndic_facilityAlias04: jQuery( "#ndic_facilityAlias04").val(),
-              ndic_facilityType : jQuery( "#ndic_facilityType" ).val(),
-              ndic_facilityAddress01 : jQuery( "#ndic_facilityAddress01").val(),
-              ndic_facilityAddress02 : jQuery( "#ndic_facilityAddress02").val(),
-              ndic_facilityCity : jQuery( "#ndic_facilityCity").val(),
-              ndic_facilityState : jQuery( "#ndic_facilityState").val(),
-              ndic_facilityZipCode : jQuery( "#ndic_facilityZipCode").val(),
-              ndic_facilityWarden : jQuery( "#ndic_facilityWarden").val(),
-              ndic_facilityChaplain : jQuery( "#ndic_facilityChaplain").val(),
-              ndic_facilityTelephone : jQuery( "#ndic_facilityTelephone").val(),
-              ndic_facilityDontSend: jQuery('#ndic_facilityDontSend').is(':checked'),
+            //console.log( res );
+
+            if (res.status != "OK") {
+               setError(res.message)
             }
-   })
-   .done( function(json){
-      actionEnded();
-      //console.log( json );
-      res  = JSON.parse( json );
+            else {
+               eventClearFacilitiesChange();
+               eventMenuFacilitiesList();
+               informTheUser( "Facility saved" )
+            }
 
-      //console.log( res );
+         });
+   }
+}
 
-      if ( res.status != "OK") {
-         setError( res.message )
-      }
-      else {
-         eventMenuFacilitiesList()
-      }
+function eventFacilityCancel() {
+   console.log("eventFacilityCancel");
 
-   });
+   var okToCancel = okToSwitch();
+
+   if (!okToCancel) {
+      okToCancel = verifyOK("You have made changes to the data. Are you OK to discard them?");
+   }
+
+   if (okToCancel) {
+      eventClearFacilitiesChange();
+      eventMenuFacilitiesList();
+   }
+}
+
+///////////////////////////////
+// Facility validation functions
+///////////////////////////////
+function validateFacilityData() {
+   return true;
 }
 
 ///////////////////////////////
 // dropdowns
 ///////////////////////////////
-function stateDropDown( includeAllOption, includeSelectOption ) {
+function stateDropDown(includeAllOption, includeSelectOption) {
    var html = "";
 
-   if ( includeAllOption ) {
+   if (includeAllOption) {
       html += "<option value='ALL'>All States</option>";
    }
 
-   if ( includeSelectOption ) {
+   if (includeSelectOption) {
       html += "<option value=''>[Select a State]</option>";
    }
 
@@ -382,6 +449,38 @@ function stateDropDown( includeAllOption, includeSelectOption ) {
 }
 
 ///////////////////////////////
+// notification Functions
+///////////////////////////////
+function notifyPleaseSaveChanges() {
+   alert("Please save changes");
+}
+
+///////////////////////////////
+// user verification Functions
+///////////////////////////////
+function verifyOK(message) {
+   alert(message);
+   return true;
+}
+
+///////////////////////////////
+// message functions
+///////////////////////////////
+function clearMessage() {
+   jQuery("#ndic_Message").html( "" );
+}
+
+function informTheUser(message) {
+   console.log("informTheUser: " + message)
+   jQuery("#ndic_Message").html( message );
+}
+
+function setError(message) {
+   console.log("setMessage: " + message)
+   jQuery("#ndic_Message").html(message);
+}
+
+///////////////////////////////
 // utility functions
 ///////////////////////////////
 function setupEvent(id, eventType, handler) {
@@ -399,24 +498,19 @@ function okToSwitch() {
 
 }
 
-function setError( message ) {
-   console.log( "setMessage: " + message)
-   jQuery( "#ndic_Message").html( message );
-}
-
 function actionStarted() {
-   jQuery( "#ndic_Message").html( "***THROBBER**");
+   jQuery("#ndic_Throbber").html("***THROBBER**");
 }
 
 function actionEnded() {
-   jQuery( "#ndic_Message").html( "");
+   jQuery("#ndic_Throbber").html("");
 }
 
 ///////////////////////////////
 // main program
 ///////////////////////////////
 console.log("Main Program");
-jQuery(document).ready(function(){
+jQuery(document).ready(function () {
 
    renderMenu();
 });
