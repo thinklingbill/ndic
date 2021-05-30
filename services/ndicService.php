@@ -18,6 +18,10 @@ switch( $requestedService ) {
         getFacilities();
         break;
 
+    case "deleteFacility" :
+        deleteFacility();
+        break;
+    
     default :
         // error message would go here
         echo json_encode( array("status"=>"error", "message"=>"unknown service requested") );
@@ -99,7 +103,7 @@ function addFacility() {
          '" . $_POST[  "ndic_facilityAlias03" ] . "',         
          '" . $_POST[  "ndic_facilityAlias04" ] . "',         
          '" . $dontSend . "',
-         'Y', now(), 0, now(), 0 )";
+         'N', now(), 0, now(), 0 )";
 
          $stmt = $conn->prepare( $sql );
          
@@ -138,7 +142,7 @@ function getFacilities() {
     try {   
 
         $sql= "
-        SELECT * FROM ndic.wp_ndic_facility
+        SELECT * FROM ndic.wp_ndic_facility where deleted_flag = 'N'
         ";
 
          $stmt = $conn->prepare( $sql );
@@ -158,6 +162,55 @@ function getFacilities() {
         while( $line = $result->fetch_array(MYSQLI_ASSOC)) {
             array_push($array,$line);
         }
+        $status = "OK";
+
+        $stmt->close();
+
+        array_unshift( $array, array( "status" => $status, "message" => "successful"));
+   
+    }
+    catch ( Exception $e ) {
+        $status = "ERROR";
+        $errorMessage = $e->getMessage();
+    
+        array_unshift( $array, array( "status" => $status, "message" => $errorMessage ) );
+    }
+
+    echo json_encode( $array );
+}
+
+function deleteFacility() {
+
+    $conn = getConnection();
+
+    $array = array();
+
+    if ( !$conn ) {
+        echo errorResponse();
+        return;
+    }  
+    try {   
+
+        $facilityId = $_POST["facility_id"];
+
+        $sql= "
+        UPDATE ndic.wp_ndic_facility 
+        SET deleted_flag = 'Y'
+        WHERE facility_id = $facilityId
+        ";
+
+         $stmt = $conn->prepare( $sql );
+
+         if ( !$stmt ) {
+            throw new Exception( $conn->error, $conn->errNo );
+        }
+
+         $stmt->execute();
+
+         if ( $conn->error ) {
+             throw new Exception( $conn->error, $conn->errNo );
+         }
+
         $status = "OK";
 
         $stmt->close();
