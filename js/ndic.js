@@ -24,7 +24,7 @@ function renderMenu() {
        <span class='ndic_menu_item' id=ndic_menuAddressCorrection>Address Correction</span> \
        <span class='ndic_menu_item' id=ndic_menuChooser>Chooser</span> \
        </div> \
-       <div id=ndic_facilitiesSubMenu></div> \
+       <div id=ndic_subMenu></div> \
       ");
 
    menuEventSetup();
@@ -40,18 +40,32 @@ function menuEventSetup() {
 function eventMenuRequests() {
    console.log("eventMenuRequests");
    clearMessage();
-   if (okToSwitch()) {
+
+   if (!okToSwitch()) {
+      verifySwitchWithPendingChanges(eventMenuRequestsWithReset)
+   }
+   else {
       actionStarted();
       highlightMenu();
+      renderRequestsPage();
       actionEnded();
    }
+}
+
+function eventMenuRequestsWithReset() {
+   console.log("eventMenuRequestsWithReset");
+   resetChangedFlag();
+   eventMenuRequests();
 }
 
 function eventMenuFacilities() {
    console.log("eventMenuFacilities");
    clearMessage();
 
-   if (okToSwitch()) {
+   if (!okToSwitch()) {
+      verifySwitchWithPendingChanges(eventMenuFacilitiesWithReset)
+   }
+   else {   
       actionStarted();
       highlightMenu();
       renderFacilitiesPage();
@@ -59,6 +73,32 @@ function eventMenuFacilities() {
    }
 }
 
+function eventMenuFacilitiesWithReset() {
+   console.log("eventMenuFacilitiesWithReset");
+   resetChangedFlag();
+   eventMenuFacilities();
+}
+
+
+///////////////////////////////
+// Requests functions
+///////////////////////////////
+
+function renderRequestsPage() {
+   console.log("renderRequestsPage");
+
+   jQuery("#ndic_ActionCanvas").html(
+      "<div id=ndic_requestsEntry>NOT YET IMPLEMENTED</div> \
+      " );
+
+   renderRequestsSubMenu();
+}
+
+function renderRequestsSubMenu() {
+   console.log("renderRequestsSubmenu");
+   jQuery("#ndic_subMenu").html("");
+
+}
 
 ///////////////////////////////
 // Facility functions
@@ -79,7 +119,7 @@ function renderFacilitiesPage() {
 
 function renderFacilitiesSubMenu() {
    console.log("renderFacilitiesSubMenu");
-   jQuery("#ndic_facilitiesSubMenu").html(
+   jQuery("#ndic_subMenu").html(
       "<div class='ndic_menu'> \
        <span class='ndic_menu_item' id=ndic_menuFacilitiesList>Facilities List</span> \
        <span class='ndic_menu_item' id=ndic_menuFacilitiesMerge>Facilities Merge</span> \
@@ -105,7 +145,10 @@ function eventMenuFacilitiesList() {
    console.log("eventMenuFacilitiesList");
    clearMessage();
 
-   if (okToSwitch()) {
+   if (!okToSwitch()) {
+      verifySwitchWithPendingChanges(eventMenuFacilitiesListWithReset)
+   }
+   else {   
       actionStarted();
       highlightMenu();
       renderFacilitiesList();
@@ -118,11 +161,21 @@ function eventMenuFacilitiesList() {
    }
 }
 
+function eventMenuFacilitiesListWithReset() {
+   console.log("eventMenuFacilitiesListWithReset");
+   resetChangedFlag();
+   eventMenuFacilitiesList();
+}
+
+
 function eventMenuFacilitiesMerge() {
    console.log("eventMenuFacilitiesMerge");
    clearMessage();
 
-   if (okToSwitch()) {
+   if (!okToSwitch()) {
+      verifySwitchWithPendingChanges(eventMenuFacilitiesMergeWithReset)
+   }
+   else {   
       actionStarted();
       highlightMenu();
       jQuery("#ndic_facilitiesMerge").show();
@@ -131,11 +184,20 @@ function eventMenuFacilitiesMerge() {
    }
 }
 
+function eventMenuFacilitiesMergeWithReset() {
+   console.log("eventMenuFacilitiesMergeWithReset");
+   resetChangedFlag();
+   eventMenuFacilitiesMerge();
+}
+
 function eventMenuFacilitiesEntry() {
    console.log("eventMenuFacilitiesEntry");
    clearMessage();
 
-   if (okToSwitch()) {
+   if (!okToSwitch()) {
+      verifySwitchWithPendingChanges(eventMenuFacilitiesEntryWithReset)
+   }
+   else {   
       actionStarted();
       highlightMenu();
       renderFacilitiesEntry();
@@ -149,18 +211,17 @@ function eventMenuFacilitiesEntry() {
    }
 }
 
+function eventMenuFacilitiesEntryWithReset() {
+   console.log("eventMenuFacilitiesEntryWithReset");
+   resetChangedFlag();
+   eventMenuFacilitiesEntry();
+}
+
 function eventFacilitiesChange() {
    console.log("eventFacilitiesChange");
    clearMessage();
 
    _unsavedData = true;
-}
-
-function eventClearFacilitiesChange() {
-   console.log("eventClearFacilitiesChange");
-   clearMessage();
-
-   _unsavedData = false;
 }
 
 // render functions
@@ -241,7 +302,7 @@ function renderFacilitiesTable() {
    })
       .done(function (json) {
          actionEnded();
-         console.log( json );
+         console.log(json);
          res = JSON.parse(json);
 
          if (res[0].status != "OK") {
@@ -340,7 +401,7 @@ function eventFacilityAdd() {
                setError(res.message)
             }
             else {
-               eventClearFacilitiesChange();
+               resetChangedFlag();
                eventMenuFacilitiesList();
                informTheUser("Facility saved")
             }
@@ -357,10 +418,10 @@ function eventFacilityCancelCheck() {
    if (!okToCancel) {
       verifyOK(
          "You have made changes to the data. Are you OK to discard them?"
-         , "Leave Form"
+         , "Cancel Changes"
          , "Stay on Form"
          , eventFacilityCancel
-         , eventMenuFacilitiesList);
+         , clearMessage );
    }
    else {
       eventFacilityCancel();
@@ -369,7 +430,7 @@ function eventFacilityCancelCheck() {
 
 function eventFacilityCancel() {
    console.log("eventFacilityCancel");
-   eventClearFacilitiesChange();
+   resetChangedFlag();
    eventMenuFacilitiesList();
 }
 
@@ -405,7 +466,7 @@ function eventFacilityDeleteFinalize() {
          actionEnded();
          //console.log( json );
          res = JSON.parse(json);
-         console.log( res );
+         console.log(res);
          if (res[0].status != "OK") {
             setError(res.message)
          }
@@ -415,7 +476,7 @@ function eventFacilityDeleteFinalize() {
          }
 
       });
-   
+
    clearMessage();
 }
 
@@ -502,6 +563,17 @@ function verifyOK(message, button1, button2, button1Event, button2Event) {
    modalMessage(message, button1, button2, button1Event, button2Event);
 }
 
+function verifySwitchWithPendingChanges(switchEvent) {
+   console.log( "verifySwitchWithPendingChanges")
+   verifyOK(
+      "You have made changes to the data. Are you OK to discard them?"
+      , "Leave Form"
+      , "Stay on Form"
+      , switchEvent
+      , clearMessage
+      , );
+}
+
 ///////////////////////////////
 // message functions
 ///////////////////////////////
@@ -521,7 +593,7 @@ function informTheUser(message) {
 function setError(message) {
    console.log("setError: " + message)
    jQuery("#ndic_Message").html(message);
-   jQuery("#ndic_Message").attr('class', 'message_error');   
+   jQuery("#ndic_Message").attr('class', 'message_error');
 }
 
 function modalMessage(message, button1, button2, button1Event, button2Event) {
@@ -537,13 +609,13 @@ function modalMessage(message, button1, button2, button1Event, button2Event) {
 
 // disables interactions on the menu and action canvas
 function disableInteractions() {
-   jQuery( "#ndic_Menu").css("pointer-events","none");
-   jQuery( "#ndic_ActionCanvas").css("pointer-events","none");
+   jQuery("#ndic_Menu").css("pointer-events", "none");
+   jQuery("#ndic_ActionCanvas").css("pointer-events", "none");
 }
 
 function enableInteractions() {
-   jQuery( "#ndic_Menu").css("pointer-events","auto");
-   jQuery( "#ndic_ActionCanvas").css("pointer-events","auto");
+   jQuery("#ndic_Menu").css("pointer-events", "auto");
+   jQuery("#ndic_ActionCanvas").css("pointer-events", "auto");
 }
 
 ///////////////////////////////
@@ -552,7 +624,7 @@ function enableInteractions() {
 function setupEvent(id, eventType, handler) {
    console.log("setupEvent for " + id);
    // unset the event if it already exists
-   jQuery(id).off(eventType, handler);
+   jQuery(id).off(eventType);
 
    // setup the event
    jQuery(id).on(eventType, handler);
@@ -562,6 +634,17 @@ function okToSwitch() {
 
    return (!_unsavedData);
 
+}
+
+function resetChangedFlag() {
+   console.log("resetChangedFlag");
+   clearMessage();
+
+   _unsavedData = false;
+}
+
+function resetSwitchConditions() {
+   resetChangedFlag();
 }
 
 function actionStarted() {
