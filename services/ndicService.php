@@ -14,6 +14,10 @@ switch( $requestedService ) {
         addFacility();
         break;
 
+    case "updateFacility" :
+            updateFacility();
+            break;
+
     case "getFacilities" :
         getFacilities();
         break;
@@ -59,7 +63,7 @@ function addFacility() {
 
         // Convert dont-send flag to Y or N
         if ( $_POST[ "ndic_facilityDontSend" ] == "true" ) {
-            $dontSend = "YES";
+            $dontSend = "Y";
         }
         else {
             $dontSend = "N";
@@ -95,8 +99,8 @@ function addFacility() {
          '" . $_POST[  "ndic_facilityCity" ] . "',
          '" . $_POST[  "ndic_facilityState" ] . "',
          '" . $_POST[  "ndic_facilityZipCode" ] . "',
-         '" . $_POST[  "ndic_facilityWarden" ] . "',
-         '" . $_POST[  "ndic_facilityChaplain" ] . "',
+         '" . $_POST[  "ndic_facilityWardenName" ] . "',
+         '" . $_POST[  "ndic_facilityChaplainName" ] . "',
          '" . $_POST[  "ndic_facilityTelephone" ] . "',
          '" . $_POST[  "ndic_facilityAlias01" ] . "',
          '" . $_POST[  "ndic_facilityAlias02" ] . "',         
@@ -119,6 +123,69 @@ function addFacility() {
          $stmt->close();
 
          echo json_encode( array( "status" => $status, "inserted_id" => $insertedId ) );
+    }
+    catch ( Exception $e ) {
+        $status = "ERROR";
+        $errorMessage = $e->getMessage();
+        
+        echo json_encode( array( "status" => $status, "message" => $errorMessage ) );
+    }
+} 
+
+function updateFacility() {
+
+    $conn = getConnection();
+
+    if ( !$conn ) {
+        echo errorResponse();
+        return;
+    }  
+
+    try {   
+        // Convert dont-send flag to Y or N
+        if ( $_POST[ "ndic_facilityDontSend" ] == "true" ) {
+            $dontSend = "Y";
+        }
+        else {
+            $dontSend = "N";
+        }
+
+        $sql= "
+        UPDATE ndic.wp_ndic_facility
+        SET name = '" . $_POST[ "ndic_facilityName" ] . "',
+            type = '" . $_POST[ "ndic_facilityType" ] . "',
+            address_01 = '" . $_POST[  "ndic_facilityAddress01" ] . "',
+            address_02 = '" . $_POST[  "ndic_facilityAddress02" ] . "',
+            city = '" . $_POST[  "ndic_facilityCity" ] . "',
+            state = '" . $_POST[  "ndic_facilityState" ] . "',
+            zip_code = '" . $_POST[  "ndic_facilityZipCode" ] . "',
+            warden_name = '" . $_POST[  "ndic_facilityWardenName" ] . "',
+            chaplain_name = '" . $_POST[  "ndic_facilityChaplainName" ] . "',
+            phone = '" . $_POST[  "ndic_facilityTelephone" ] . "',
+            alias_01 = '" . $_POST[  "ndic_facilityAlias01" ] . "',
+            alias_02 = '" . $_POST[  "ndic_facilityAlias02" ] . "',         
+            alias_03 = '" . $_POST[  "ndic_facilityAlias03" ] . "',         
+            alias_04 = '" . $_POST[  "ndic_facilityAlias04" ] . "',         
+            devotional_send_disallowed_flag = '" . $dontSend . "',
+            deleted_flag = 'N',
+            modify_date = now(),
+            modify_user_id = 0
+        WHERE facility_id = " . $_POST[ "ndic_facilityId" ];  
+
+         $stmt = $conn->prepare( $sql );
+         
+         $stmt->execute();
+
+         if ( $conn->error ) {
+             throw new Exception( $conn->error, $conn->errNo );
+         }
+         $insertedId = $conn->insert_id;
+
+         $status = "OK";
+
+         $stmt->close();
+
+         echo json_encode( array( "status" => $status, "updated_id" => $_POST["ndic_facilityId"] ) );
     }
     catch ( Exception $e ) {
         $status = "ERROR";

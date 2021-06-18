@@ -275,8 +275,8 @@ function renderFacilitiesEntry() {
             <div class=ndic_form_row><span class=ndic_form_label>City:</span> <input id=ndic_facilityCity class=ndic_form_entry_medium></input></div> \
             <div class=ndic_form_row><span class=ndic_form_label>State:</span> <select id=ndic_facilityState class=ndic_form_entry_medium>" + stateDropDown(false, true) + "</select></div> \
             <div class=ndic_form_row><span class=ndic_form_label>Zip Code:</span> <input id=ndic_facilityZipCode class='ndic_form_entry_small ndic_zip_code'></input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>Warden:</span> <input id=ndic_facilityWarden class=ndic_form_entry_medium></input></div> \
-            <div class=ndic_form_row><span class=ndic_form_label>Chaplain:</span> <input id=ndic_facilityChaplain class=ndic_form_entry_medium></input></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>Warden:</span> <input id=ndic_facilityWardenName class=ndic_form_entry_medium></input></div> \
+            <div class=ndic_form_row><span class=ndic_form_label>Chaplain:</span> <input id=ndic_facilityChaplainName class=ndic_form_entry_medium></input></div> \
             <div class=ndic_form_row><span class=ndic_form_label>Telephone:</span> <input id=ndic_facilityTelephone class='ndic_form_entry_medium ndic_phone'></input></div> \
             <div class=ndic_form_row><span class=ndic_form_label></span><span class=ndic_form_entry_big> <input type=checkbox id=ndic_facilityDontSend></input> Don't send devotionals to this facility</span></div> \
             <div class=ndic_button_row> \
@@ -345,18 +345,19 @@ function renderFacilitiesTable() {
                   + res[i].name + "'>delete</a></td>";
                html += "<td class=facilityName>" + res[i].name + "</td>";
                html += "<td class=facilityType>" + res[i].type + "</td>";
-               html += "<td><span class=facilityAddress01>" + res[i].address_01 + "</span>"
+               html += "<td><span class=facilityAddress01>" + res[i].address_01 + "</span> "
                   + "<span class=facilityAddress02>" + res[i].address_02 + "</span></td>";
                html += "<td class=facilityCity>" + res[i].city + "</td>";
                html += "<td class=facilityState>" + res[i].state + "</td>";
                html += "<td class=facilityZipCode>" + res[i].zip_code + "</td>";
-               html += "<td>" + res[i].alias_01 + " "
-                  + res[i].alias_02 + " "
-                  + res[i].alias_03 + "</td>";
-               html += "<td>" + res[i].devotional_send_disallowed_flag + "</td>";
-               html += "<td>" + res[i].warden_name + "</td>";
-               html += "<td>" + res[i].chaplain_name + "</td>";
-               html += "<td>" + res[i].phone + "</td>";
+               html += "<td><span class=facilityAlias01>" + res[i].alias_01 + "</span> "
+                  + "<span class=facilityAlias02>" + res[i].alias_02 + "</span> "
+                  + "<span class=facilityAlias03>" + res[i].alias_03 + "</span> "
+                  + "<span class=facilityAlias04>" + res[i].alias_03 + "</span></td>";
+               html += "<td class=facilityDontSend>" + res[i].devotional_send_disallowed_flag + "</td>";
+               html += "<td class=facilityWardenName>" + res[i].warden_name + "</td>";
+               html += "<td class=facilityChaplainName>" + res[i].chaplain_name + "</td>";
+               html += "<td class=facilityTelephone>" + res[i].phone + "</td>";
                html += "</tr>";
             }
             html += "</tbody>";
@@ -393,8 +394,8 @@ function eventFacilityAdd() {
             ndic_facilityCity: jQuery("#ndic_facilityCity").val(),
             ndic_facilityState: jQuery("#ndic_facilityState").val(),
             ndic_facilityZipCode: jQuery("#ndic_facilityZipCode").val(),
-            ndic_facilityWarden: jQuery("#ndic_facilityWarden").val(),
-            ndic_facilityChaplain: jQuery("#ndic_facilityChaplain").val(),
+            ndic_facilityWardenName: jQuery("#ndic_facilityWardenName").val(),
+            ndic_facilityChaplainName: jQuery("#ndic_facilityChaplainName").val(),
             ndic_facilityTelephone: jQuery("#ndic_facilityTelephone").val(),
             ndic_facilityDontSend: jQuery('#ndic_facilityDontSend').is(':checked'),
          }
@@ -431,6 +432,7 @@ function eventFacilityUpdate() {
          url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
          data: {
             service: "updateFacility",
+            ndic_facilityId: jQuery("#ndic_facilityId").val(),
             ndic_facilityName: jQuery("#ndic_facilityName").val(),
             ndic_facilityAlias01: jQuery("#ndic_facilityAlias01").val(),
             ndic_facilityAlias02: jQuery("#ndic_facilityAlias02").val(),
@@ -442,8 +444,8 @@ function eventFacilityUpdate() {
             ndic_facilityCity: jQuery("#ndic_facilityCity").val(),
             ndic_facilityState: jQuery("#ndic_facilityState").val(),
             ndic_facilityZipCode: jQuery("#ndic_facilityZipCode").val(),
-            ndic_facilityWarden: jQuery("#ndic_facilityWarden").val(),
-            ndic_facilityChaplain: jQuery("#ndic_facilityChaplain").val(),
+            ndic_facilityWardenName: jQuery("#ndic_facilityWardenName").val(),
+            ndic_facilityChaplainName: jQuery("#ndic_facilityChaplainName").val(),
             ndic_facilityTelephone: jQuery("#ndic_facilityTelephone").val(),
             ndic_facilityDontSend: jQuery('#ndic_facilityDontSend').is(':checked'),
          }
@@ -497,23 +499,23 @@ function eventFacilityEdit() {
 
    // gather values from the row
    var facilityId = jQuery(this).attr("facility_id");
-   var facilityName = jQuery(this).closest('tr').find(".facilityName").text()
-   var facilityType = jQuery(this).closest('tr').find(".facilityType").text()
-   var facilityAddress01 = jQuery(this).closest('tr').find(".facilityAddress01").text()
-   var facilityAddress02 = jQuery(this).closest('tr').find(".facilityAddress02").text()
-   var facilityCity = jQuery(this).closest('tr').find(".facilityCity").text()
-   var facilityState = jQuery(this).closest('tr').find(".facilityState").text()
-   var facilityZipCode = jQuery(this).closest('tr').find(".facilityZipCode").text()
-
-   // TODO - gather remaining values. 
+   var facilityName = jQuery(this).closest('tr').find(".facilityName").text();
+   var facilityType = jQuery(this).closest('tr').find(".facilityType").text();
+   var facilityAddress01 = jQuery(this).closest('tr').find(".facilityAddress01").text();
+   var facilityAddress02 = jQuery(this).closest('tr').find(".facilityAddress02").text();
+   var facilityCity = jQuery(this).closest('tr').find(".facilityCity").text();
+   var facilityState = jQuery(this).closest('tr').find(".facilityState").text();
+   var facilityZipCode = jQuery(this).closest('tr').find(".facilityZipCode").text();
+   var facilityAlias01 = jQuery(this).closest('tr').find(".facilityAlias01").text();
+   var facilityAlias02 = jQuery(this).closest('tr').find(".facilityAlias02").text();
+   var facilityAlias03 = jQuery(this).closest('tr').find(".facilityAlias03").text();
+   var facilityAlias04 = jQuery(this).closest('tr').find(".facilityAlias04").text();
+   var facilityDontSend = jQuery(this).closest('tr').find(".facilityDontSend").text();
+   var facilityWardenName = jQuery(this).closest('tr').find(".facilityWardenName").text();
+   var facilityChaplainName = jQuery(this).closest('tr').find(".facilityChaplainName").text();
+   var facilityTelephone = jQuery(this).closest('tr').find(".facilityTelephone").text();
 
    console.log("eventFacilityEdit: " + facilityId + " - " + facilityName);
-   console.log("eventFacilityEdit: " + facilityId + " - " + facilityType);
-   console.log("eventFacilityEdit: " + facilityId + " - " + facilityAddress01);
-   console.log("eventFacilityEdit: " + facilityId + " - " + facilityAddress02);
-   console.log("eventFacilityEdit: " + facilityId + " - " + facilityCity);
-   console.log("eventFacilityEdit: " + facilityId + " - " + facilityState);
-   console.log("eventFacilityEdit: " + facilityId + " - " + facilityZipCode);
 
    clearMessage();
 
@@ -524,7 +526,23 @@ function eventFacilityEdit() {
       actionStarted();
       highlightMenu();
       renderFacilitiesEntry();
-      // TODO - populate values in the entry - including ndic_facility_id
+      // populate the form      
+      jQuery("#ndic_facilitiesEntry #ndic_facilityId").val(facilityId);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityName").val(facilityName);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityAddress01").val(facilityAddress01);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityAddress02").val(facilityAddress02);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityAlias01").val(facilityAlias01);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityAlias02").val(facilityAlias02);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityAlias03").val(facilityAlias03);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityAlias04").val(facilityAlias04);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityType").val(facilityType);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityCity").val(facilityCity);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityState").val(facilityState);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityZipCode").val(facilityZipCode);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityWardenName").val(facilityWardenName);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityChaplainName").val(facilityChaplainName);
+      jQuery("#ndic_facilitiesEntry #ndic_facilityTelephone").val(facilityTelephone);
+
       jQuery("#ndic_facilitiesAddNewButton").hide();
       jQuery("#ndic_facilitiesEntry").show();
       jQuery("#ndic_facilitiesList").hide();
