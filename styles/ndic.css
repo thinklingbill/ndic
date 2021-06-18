@@ -155,6 +155,10 @@
    width: 95px;
 }
 
+.ndic_hidden {
+   display:none;
+}
+
 /* filter styles*/
 .ndic_filter {
    display: inline-block;

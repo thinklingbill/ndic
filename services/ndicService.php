@@ -139,11 +139,20 @@ function getFacilities() {
 
     $array = array();
 
+    $state = $_POST["state"];
+    if ( $state != "ALL" ) {
+        $stateWhere = " and state = '$state'";
+    }
+    else {
+        $stateWhere = "";
+    }
+
     try {   
 
         $sql= "
-        SELECT * FROM ndic.wp_ndic_facility where deleted_flag = 'N'
-        ";
+        SELECT * FROM ndic.wp_ndic_facility where deleted_flag = 'N'" 
+        . $stateWhere
+        . " order by name";
 
          $stmt = $conn->prepare( $sql );
 
