@@ -65,7 +65,7 @@ function eventMenuFacilities() {
    if (!okToSwitch()) {
       verifySwitchWithPendingChanges(eventMenuFacilitiesWithReset)
    }
-   else {   
+   else {
       actionStarted();
       highlightMenu();
       renderFacilitiesPage();
@@ -81,17 +81,19 @@ function eventMenuFacilitiesWithReset() {
 
 
 ///////////////////////////////
-// Requests functions
+// Request functions
 ///////////////////////////////
 
 function renderRequestsPage() {
    console.log("renderRequestsPage");
 
-   jQuery("#ndic_ActionCanvas").html(
-      "<div id=ndic_requestsEntry>NOT YET IMPLEMENTED</div> \
+   jQuery("#ndic_ActionCanvas").html("\
+       <div id=ndic_requestsPage></div> \
       " );
 
    renderRequestsSubMenu();
+
+   eventMenurequestsPage();
 }
 
 function renderRequestsSubMenu() {
@@ -99,6 +101,153 @@ function renderRequestsSubMenu() {
    jQuery("#ndic_subMenu").html("");
 
 }
+
+function eventMenurequestsPage() {
+   console.log("eventMenurequestsPage");
+   clearMessage();
+
+   if (!okToSwitch()) {
+      verifySwitchWithPendingChanges(eventMenurequestsPageWithReset)
+   }
+   else {
+      actionStarted();
+      highlightMenu();
+      renderrequestsPage();
+      //      setupEvent("#ndic_newRequestBtn", "click", eventMenuRequestsEntry);
+      actionEnded();
+   }
+}
+
+function eventRequestsChange() {
+   console.log("eventRequestsChange");
+   clearMessage();
+
+   _unsavedData = true;
+}
+
+// render functions
+function renderrequestsPage() {
+   console.log("renderrequestsPage");
+
+   jQuery("#ndic_requestsPage").html(" \
+   <div> \
+      <div class=ndic_filter>Date Range: \
+            <input id=ndic_filterDateRangeStart> \
+            <input id=ndic_filterDateRangeEnd> \
+      </div> \
+      <div class=ndic_page_title>Add New Request</div> \
+      <div id=ndic_requestsEntry></div> \
+      <div id=ndic_requestsTable></div> \
+   </div> \
+   " );
+
+   //   setupEvent("#ndic_filterState", "change", renderFacilitiesTable)
+
+   renderRequestsEntry();
+
+   renderRequestsTable();
+}
+
+function renderRequestsEntry() {
+
+   console.log("renderRequestsEntry");
+
+   // TODO - Check facilities entry for redundant div
+   jQuery("#ndic_requestsEntry").html(" \
+            <div id=ndic_requestForm> \
+               <input id=ndic_requestId class=ndic_hidden value=0 /> \
+               <div class=ndic_form_row> \
+                  <span class=ndic_form_label>First Name:</span> <input id=ndic_recipientFirstName class=ndic_form_entry_medium></input>\
+                  <span class=ndic_form_label>MI:</span> <input id=ndic_recipientMI class=ndic_form_entry_small></input>\
+                  <span class=ndic_form_label>Last Name:</span> <input id=ndic_recipientLastName class=ndic_form_entry_medium></input>\
+               </div> \
+               <div class=ndic_form_row><span class=ndic_form_label>Address 1:</span> <input id=ndic_recipientAddress01 class=ndic_form_entry_big></input></div> \
+               <div class=ndic_form_row><span class=ndic_form_label>Address 2:</span> <input id=ndic_recipientAddress02 class=ndic_form_entry_big></input></div> \
+               <div class=ndic_form_row><span class=ndic_form_label>City:</span> <input id=ndic_recipientCity class=ndic_form_entry_medium></input></div> \
+               <div class=ndic_form_row><span class=ndic_form_label>State:</span> <select id=ndic_recipientState class=ndic_form_entry_medium>" + stateDropDown(false, true) + "</select></div> \
+               <div class=ndic_form_row><span class=ndic_form_label>Zip Code:</span> <input id=ndic_recipientZipCode class='ndic_form_entry_small ndic_zip_code'></input></div> \
+               <div class=ndic_button_row> \
+                  <button class=ndic_button id=ndic_requestAddBtn>Add Request</button> \
+               <div class=ndic_form_label>* = Required</div> \
+            </div> \
+      " );
+
+   // setup field masks
+   jQuery('.ndic_phone').mask('(000) 000-0000');
+   jQuery('.ndic_zip_code').mask('00000-ZZZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
+
+   setupEvent("#ndic_requestsEntry input", "change", eventRequestsChange);
+}
+
+function renderRequestsTable() {
+   console.log("renderRequestsTable");
+
+   actionStarted();
+
+   jQuery.ajax({
+      method: "POST",
+      url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+      data: {
+         service: "getRequests"
+         , dateRangeStart: jQuery("#ndic_filterDateRangeStart").val()
+         , dateRangeEnd: jQuery("#ndic_filterDateRangeEnd").val()
+      }
+   })
+      .done(function (json) {
+         actionEnded();
+         //console.log(json);
+         res = JSON.parse(json);
+
+         if (res[0].status != "OK") {
+            setError(res[0].message)
+         }
+         else {
+            var html = "<table class='ndic_table'>";
+            html += "<thead>";
+            html += "<tr>";
+            html += "<th></th>";
+            html += "<th>Name</th>";
+            html += "<th>ID #</th>";
+            html += "<th>Facility</th>";
+            html += "<th>Address</th>";
+            html += "<th>City</th>";
+            html += "<th>State</th>";
+            html += "<th>Zip Code</th>";
+            html += "<th>Entered On</th>";
+            html += "<th>Dorm</th>";
+            html += "<th>Details</th>";
+            html += "<th>N.S.</th>";
+            html += "<th>I.T.</th>";
+            html += "<th>P.R.</th>";
+            html += "<th>B.R.</th>";
+            html += "<th>S</th>";
+            html += "<th>N.D.</th>";
+            html += "<th>Dup</th>";
+            html += "<th>Friend Of</th>";
+            html += "<th>Entered By</th>";
+            html += "</tr>";
+            html += "</thead>";
+            html += "<tbody>";
+            for (var i = 1; i < res.length; i++) {
+               html += "<tr>";
+               html += "<td><a href='#' class='editRequest' request_id='"
+                  + res[i].request_id + "'>edit</a> | ";
+               html += "<a href='#' class='deleteRequest' request_id='"
+                  + res[i].request_id + "'>delete</a></td>";
+               // TODO MORE HERE
+               html += "</tr>";
+            }
+            html += "</tbody>";
+            html += "</table>";
+
+            jQuery("#ndic_RequestsTable").html(html);
+            // TODO Set these up
+            // setupEvent(".editRequest", "click", eventRequestEdit);
+            // setupEvent(".deleteRequest", "click", eventRequestDelete)
+         }
+      });
+}
+
 
 ///////////////////////////////
 // Facility functions
@@ -148,7 +297,7 @@ function eventMenuFacilitiesList() {
    if (!okToSwitch()) {
       verifySwitchWithPendingChanges(eventMenuFacilitiesListWithReset)
    }
-   else {   
+   else {
       actionStarted();
       highlightMenu();
       renderFacilitiesList();
@@ -175,7 +324,7 @@ function eventMenuFacilitiesMerge() {
    if (!okToSwitch()) {
       verifySwitchWithPendingChanges(eventMenuFacilitiesMergeWithReset)
    }
-   else {   
+   else {
       actionStarted();
       highlightMenu();
       jQuery("#ndic_facilitiesMerge").show();
@@ -197,7 +346,7 @@ function eventMenuFacilitiesEntry() {
    if (!okToSwitch()) {
       verifySwitchWithPendingChanges(eventMenuFacilitiesEntryWithReset)
    }
-   else {   
+   else {
       actionStarted();
       highlightMenu();
       renderFacilitiesEntry();
@@ -207,7 +356,7 @@ function eventMenuFacilitiesEntry() {
       setupEvent("#ndic_facilityAddBtn", "click", eventFacilityAdd);
       setupEvent("#ndic_facilityCancelBtn", "click", eventFacilityCancelCheck);
       jQuery("#ndic_facilityAddBtn").show()
-      jQuery("#ndic_facilityUpdateBtn").hide()      
+      jQuery("#ndic_facilityUpdateBtn").hide()
       jQuery("#ndic_facilityName").focus();
       actionEnded();
    }
@@ -231,7 +380,7 @@ function renderFacilitiesList() {
    console.log("renderFacilitiesList");
 
    jQuery("#ndic_facilitiesList").html(" \
-   <div id=> \
+   <div> \
       <div class=ndic_filter>Filter by State: \
             <select id=ndic_filterState>" + stateDropDown(true, false) + "</select></div> \
       <div class=ndic_page_title>Facility Administration</div> \
@@ -252,7 +401,6 @@ function renderFacilitiesEntry() {
    console.log("renderFacilitiesEntry");
 
    jQuery("#ndic_facilitiesEntry").html(" \
-      <div id=ndic_facilitiesEntry> \
          <div class=ndic_page_title>Add a Correctional Facility</div> \
          <div id=ndic_facilityForm> \
             <input id=ndic_facilityId class=ndic_hidden value=0 /> \
@@ -285,7 +433,6 @@ function renderFacilitiesEntry() {
                <button class=ndic_button id=ndic_facilityCancelBtn>Cancel</button></div> \
             <div class=ndic_form_label>* = Required</div> \
          </div> \
-      </div> \
    " );
 
    // setup field masks
@@ -306,7 +453,7 @@ function renderFacilitiesTable() {
       url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
       data: {
          service: "getFacilities"
-        ,state: jQuery("#ndic_filterState").val()
+         , state: jQuery("#ndic_filterState").val()
       }
    })
       .done(function (json) {
@@ -481,7 +628,7 @@ function eventFacilityCancelCheck() {
          , "Cancel Changes"
          , "Stay on Form"
          , eventFacilityCancel
-         , clearMessage );
+         , clearMessage);
    }
    else {
       eventFacilityCancel();
@@ -522,7 +669,7 @@ function eventFacilityEdit() {
    if (!okToSwitch()) {
       verifySwitchWithPendingChanges(eventMenuFacilitiesEntryWithReset)
    }
-   else {   
+   else {
       actionStarted();
       highlightMenu();
       renderFacilitiesEntry();
@@ -681,7 +828,7 @@ function verifyOK(message, button1, button2, button1Event, button2Event) {
 }
 
 function verifySwitchWithPendingChanges(switchEvent) {
-   console.log( "verifySwitchWithPendingChanges")
+   console.log("verifySwitchWithPendingChanges")
    verifyOK(
       "You have made changes to the data. Are you OK to discard them?"
       , "Leave Form"
