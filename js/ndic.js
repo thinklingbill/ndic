@@ -93,7 +93,7 @@ function renderRequestsPage() {
 
    renderRequestsSubMenu();
 
-   eventMenurequestsPage();
+   renderRequestsList();
 }
 
 function renderRequestsSubMenu() {
@@ -102,17 +102,17 @@ function renderRequestsSubMenu() {
 
 }
 
-function eventMenurequestsPage() {
-   console.log("eventMenurequestsPage");
+function eventMenuRequestsPage() {
+   console.log("eventMenuRequestsPage");
    clearMessage();
 
    if (!okToSwitch()) {
-      verifySwitchWithPendingChanges(eventMenurequestsPageWithReset)
+      verifySwitchWithPendingChanges(eventMenuRequestsPageWithReset)
    }
    else {
       actionStarted();
       highlightMenu();
-      renderrequestsPage();
+      renderRequestsPage();
       //      setupEvent("#ndic_newRequestBtn", "click", eventMenuRequestsEntry);
       actionEnded();
    }
@@ -126,14 +126,14 @@ function eventRequestsChange() {
 }
 
 // render functions
-function renderrequestsPage() {
-   console.log("renderrequestsPage");
+function renderRequestsList() {
+   console.log("renderRequestsList");
 
    jQuery("#ndic_requestsPage").html(" \
    <div> \
       <div class=ndic_filter>Date Range: \
-            <input id=ndic_filterDateRangeStart class=ndic_form_entry_small> \
-            <input id=ndic_filterDateRangeEnd class=ndic_form_entry_small> \
+            <input id=ndic_filterDateRangeStart class=ndic_form_entry_small value='07/02/2021'></input> \
+            <input id=ndic_filterDateRangeEnd class=ndic_form_entry_small value='07/02/2021'></input> \
             <input type=checkbox id=ndic_requestOnlyMyRequests></input> <span>Only Show My Requests</span> \
             <button class=ndic_button id=ndic_retrieveDateRangeBtn>Retrieve</button> \
       </div> \
@@ -143,7 +143,7 @@ function renderrequestsPage() {
    </div> \
    " );
 
-   //   setupEvent("#ndic_filterState", "change", renderFacilitiesTable)
+   setupEvent("#ndic_retrieveDateRangeBtn", "click", renderRequestsTable)
 
    renderRequestsEntry();
 
@@ -164,7 +164,7 @@ function renderRequestsEntry() {
                </div> \
                <div class=ndic_form_row> \
                   <span class=ndic_form_label>Suffix:</span> <input id=ndic_recipientSuffix class=ndic_form_entry_small></input> \
-                  <span class=ndic_form_label_not_padded>ID #:</span> <input id=ndic_recipientIdNo class=ndic_form_entry_small></input> \
+                  <span class=ndic_form_label_not_padded>ID #:</span> <input id=ndic_recipientSpin class=ndic_form_entry_small></input> \
                </div> \
                <div class=ndic_form_row> \
                   <span class=ndic_form_label>Facility:</span><span>Match Text*</span> \
@@ -185,17 +185,17 @@ function renderRequestsEntry() {
                </div> \
                <div class=ndic_form_row> \
                   <span class=ndic_form_label>Options:</span> \
-                  <input type=checkbox id=ndic_recipientNoSpiral></input> <span>No Spiral&nbsp;&nbsp;</span> \
-                  <input type=checkbox id=ndic_recipientInTouch></input> <span>In Touch&nbsp;&nbsp;</span> \
-                  <input type=checkbox id=ndic_recipientPrayerRequest></input> <span>Prayer Request&nbsp;&nbsp;</span> \
-                  <input type=checkbox id=ndic_recipientBibleRequest></input> <span>Bible Request&nbsp;&nbsp;</span> \
-                  <input type=checkbox id=ndic_recipientSpanish></input> <span>Spanish&nbsp;&nbsp;</span> \
-                  <input type=checkbox id=ndic_recipientNoDevotional></input> <span>No Devotional&nbsp;&nbsp;</span> \
-                  <input type=checkbox id=ndic_recipientDuplicate></input> <span>Duplicate&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_requestNoSpiralFlag></input> <span>No Spiral&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_requestInTouchFlag></input> <span>In Touch&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_requestPrayerRequestFlag></input> <span>Prayer Request&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_requestBibleRequestFlag></input> <span>Bible Request&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_requestSpanishFlag></input> <span>Spanish&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_requestNoDevotionalFlag></input> <span>No Devotional&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_requestDuplicateFlag></input> <span>Duplicate&nbsp;&nbsp;</span> \
                </div> \
                <div class=ndic_form_row> \
                   <span class=ndic_form_label>Details:</span> \
-                  <textarea id=ndic_recipientDetails></textarea> \
+                  <textarea id=ndic_requestDetails></textarea> \
                </div> \
                <div class=ndic_button_row> \
                   <button class=ndic_button id=ndic_requestAddBtn>Add Request</button> \
@@ -220,8 +220,8 @@ function renderRequestsTable() {
       url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
       data: {
          service: "getRequests"
-         , dateRangeStart: jQuery("#ndic_filterDateRangeStart").val()
-         , dateRangeEnd: jQuery("#ndic_filterDateRangeEnd").val()
+         , request_start_date: jQuery("#ndic_filterDateRangeStart").val()
+         , request_end_date: jQuery("#ndic_filterDateRangeEnd").val()
       }
    })
       .done(function (json) {
@@ -265,13 +265,34 @@ function renderRequestsTable() {
                   + res[i].request_id + "'>edit</a> | ";
                html += "<a href='#' class='deleteRequest' request_id='"
                   + res[i].request_id + "'>delete</a></td>";
-               // TODO MORE HERE
+               html += "<td class=recipientName>" + res[i].first_name + " " 
+                                                  + res[i].middle_initial + " " 
+                                                  + res[i].last_name + "</td>";
+               html += "<td class=recipientSpin>" + res[i].spin + "</td>";
+               html += "<td class=recipientFacility>" + res[i].facility_name + "</td>";
+               html += "<td><span class=recipientAddress01>" + res[i].address_01 + "</span> "
+                  + "<span class=recipientAddress02>" + res[i].address_02 + "</span></td>";
+               html += "<td class=recipientCity>" + res[i].city + "</td>";
+               html += "<td class=recipientState>" + res[i].state + "</td>";
+               html += "<td class=recipientZipCode>" + res[i].zip_code + "</td>";
+               html += "<td class=requestCreateDate>" + res[i].create_date + "</td>";
+               html += "<td class=recipientDorm>" + res[i].dorm + "</td>";
+               html += "<td class=requestDetails>" + res[i].details + "</td>";
+               html += "<td class=requestNoSpiralFlag>" + res[i].no_spiral_flag + "</td>";
+               html += "<td class=requestInTouchFlag>" + res[i].in_touch_flag + "</td>";
+               html += "<td class=requestPrayerRequestFlag>" + res[i].prayer_request_flag + "</td>";
+               html += "<td class=requestBibleRequestFlag>" + res[i].bible_request_flag + "</td>";
+               html += "<td class=requestSpanishFlag>" + res[i].spanish_flag + "</td>";
+               html += "<td class=requestNoDevotionalFlag>" + res[i].no_devotional_flag + "</td>";
+               html += "<td class=requestDuplicateFlag>" + res[i].duplicate_flag + "</td>";
+               html += "<td class=requestRequestingFriendName>" + res[i].requesting_friend_name + "</td>";
+               html += "<td class=requestEnteredBy>" + "</td>";
                html += "</tr>";
             }
             html += "</tbody>";
             html += "</table>";
 
-            jQuery("#ndic_RequestsTable").html(html);
+            jQuery("#ndic_requestsTable").html(html);
             // TODO Set these up
             // setupEvent(".editRequest", "click", eventRequestEdit);
             // setupEvent(".deleteRequest", "click", eventRequestDelete)
