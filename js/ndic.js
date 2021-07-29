@@ -132,8 +132,10 @@ function renderrequestsPage() {
    jQuery("#ndic_requestsPage").html(" \
    <div> \
       <div class=ndic_filter>Date Range: \
-            <input id=ndic_filterDateRangeStart> \
-            <input id=ndic_filterDateRangeEnd> \
+            <input id=ndic_filterDateRangeStart class=ndic_form_entry_small> \
+            <input id=ndic_filterDateRangeEnd class=ndic_form_entry_small> \
+            <input type=checkbox id=ndic_requestOnlyMyRequests></input> <span>Only Show My Requests</span> \
+            <button class=ndic_button id=ndic_retrieveDateRangeBtn>Retrieve</button> \
       </div> \
       <div class=ndic_page_title>Add New Request</div> \
       <div id=ndic_requestsEntry></div> \
@@ -152,23 +154,52 @@ function renderRequestsEntry() {
 
    console.log("renderRequestsEntry");
 
-   // TODO - Check facilities entry for redundant div
    jQuery("#ndic_requestsEntry").html(" \
             <div id=ndic_requestForm> \
                <input id=ndic_requestId class=ndic_hidden value=0 /> \
                <div class=ndic_form_row> \
                   <span class=ndic_form_label>First Name:</span> <input id=ndic_recipientFirstName class=ndic_form_entry_medium></input>\
-                  <span class=ndic_form_label>MI:</span> <input id=ndic_recipientMI class=ndic_form_entry_small></input>\
-                  <span class=ndic_form_label>Last Name:</span> <input id=ndic_recipientLastName class=ndic_form_entry_medium></input>\
+                  <span class=ndic_form_label_not_padded>MI:</span> <input id=ndic_recipientMI class=ndic_form_entry_small></input>\
+                  <span class=ndic_form_label_not_padded>Last Name:</span> <input id=ndic_recipientLastName class=ndic_form_entry_medium></input>\
+               </div> \
+               <div class=ndic_form_row> \
+                  <span class=ndic_form_label>Suffix:</span> <input id=ndic_recipientSuffix class=ndic_form_entry_small></input> \
+                  <span class=ndic_form_label_not_padded>ID #:</span> <input id=ndic_recipientIdNo class=ndic_form_entry_small></input> \
+               </div> \
+               <div class=ndic_form_row> \
+                  <span class=ndic_form_label>Facility:</span><span>Match Text*</span> \
+                  <input id=ndic_recipientFacilityMatchText class=ndic_form_entry_small></input> \
+                  <select id=ndic_recipientFacilityId class=ndic_form_entry_big></select> \
+                  <input type=checkbox id=ndic_recipientUseFacilityAddress></input> <span>Use Facility Address</span> \
                </div> \
                <div class=ndic_form_row><span class=ndic_form_label>Address 1:</span> <input id=ndic_recipientAddress01 class=ndic_form_entry_big></input></div> \
                <div class=ndic_form_row><span class=ndic_form_label>Address 2:</span> <input id=ndic_recipientAddress02 class=ndic_form_entry_big></input></div> \
-               <div class=ndic_form_row><span class=ndic_form_label>City:</span> <input id=ndic_recipientCity class=ndic_form_entry_medium></input></div> \
-               <div class=ndic_form_row><span class=ndic_form_label>State:</span> <select id=ndic_recipientState class=ndic_form_entry_medium>" + stateDropDown(false, true) + "</select></div> \
-               <div class=ndic_form_row><span class=ndic_form_label>Zip Code:</span> <input id=ndic_recipientZipCode class='ndic_form_entry_small ndic_zip_code'></input></div> \
+               <div class=ndic_form_row> \
+                  <span class=ndic_form_label>City:</span> <input id=ndic_recipientCity class=ndic_form_entry_medium></input> \
+                  <span class=ndic_form_label_not_padded>State:</span> <select id=ndic_recipientState class=ndic_form_entry_medium>" + stateDropDown(false, true) + "</select> \
+                  <span class=ndic_form_label_not_padded>Zip Code:</span> <input id=ndic_recipientZipCode class='ndic_form_entry_small ndic_zip_code'></input> \
+               </div> \
+               <div class=ndic_form_row> \
+                  <span class=ndic_form_label>Dorm:</span> <input id=ndic_recipientDorm class=ndic_form_entry_medium></input> \
+                  <span class=ndic_form_label_not_padded>Friend of: <i>Match text**</i>:</span> <input id=ndic_recipientFriendOf class=ndic_form_entry_medium></input> \
+               </div> \
+               <div class=ndic_form_row> \
+                  <span class=ndic_form_label>Options:</span> \
+                  <input type=checkbox id=ndic_recipientNoSpiral></input> <span>No Spiral&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_recipientInTouch></input> <span>In Touch&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_recipientPrayerRequest></input> <span>Prayer Request&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_recipientBibleRequest></input> <span>Bible Request&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_recipientSpanish></input> <span>Spanish&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_recipientNoDevotional></input> <span>No Devotional&nbsp;&nbsp;</span> \
+                  <input type=checkbox id=ndic_recipientDuplicate></input> <span>Duplicate&nbsp;&nbsp;</span> \
+               </div> \
+               <div class=ndic_form_row> \
+                  <span class=ndic_form_label>Details:</span> \
+                  <textarea id=ndic_recipientDetails></textarea> \
+               </div> \
                <div class=ndic_button_row> \
                   <button class=ndic_button id=ndic_requestAddBtn>Add Request</button> \
-               <div class=ndic_form_label>* = Required</div> \
+                  <div class=ndic_form_label>* = Required</div> \
             </div> \
       " );
 

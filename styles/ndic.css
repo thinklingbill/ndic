@@ -141,6 +141,11 @@
 .ndic_form_label {
    display: inline-block;
    width: 100px;
+   vertical-align: top;
+}
+
+.ndic_form_label_not_padded {
+   display: inline-block;
 }
 
 .ndic_form_entry_big {
@@ -162,6 +167,11 @@
 /* filter styles*/
 .ndic_filter {
    display: inline-block;
+}
+
+textarea {
+   width: 600px;
+   height: 3em;
 }
 
 /* button styles
