@@ -8,6 +8,7 @@ create table import_request as
      select rq.request_id
      , rq.recipient_id
      , a.address_id
+     , r.facility_id
      , rq.request_date
      , r.first_name
      , r.middle_initial
@@ -31,6 +32,7 @@ create table import_request as
      , rq.no_devotional_flag
      , rq.duplicate_flag
      , rq.details
+     , rq.requesting_friend_id
      , rq.deleted_flag
      , rq.create_date
      , rq.create_user_id
@@ -69,6 +71,7 @@ having count(*) > 1;
 
 select count(*) from import_request where deleted_flag = 'N';
 
+select count(*) from devote_request where deleted_flag = 'N';
 select count(*) from devote_request where deleted_flag = 'N';
 
 -- find missing requests
