@@ -30,6 +30,10 @@ switch ($requestedService) {
         getRequests();
         break;
 
+    case "lookupRecipient":
+        lookupRecipient();
+        break;
+
     default:
         // error message would go here
         echo json_encode(array("status" => "error", "message" => "unknown service requested"));
@@ -320,11 +324,11 @@ function getRequests()
     $startDate = $_POST["request_start_date"];
     $endDate = $_POST["request_end_date"];
 
-    if ( $startDate == "" ) {
+    if ($startDate == "") {
         $startDate = date("m/d/Y");
     }
 
-    if ( $endDate == "" ) {
+    if ($endDate == "") {
         $endDate = date("m/d/Y");
     }
 
@@ -372,7 +376,78 @@ function getRequests()
                           and str_to_date( '$endDate', '%m/%d/%Y' )
    ORDER BY
          rq.create_date
-   ";       
+   ";
+
+        $stmt = $conn->prepare($sql);
+
+        if (!$stmt) {
+            throw new Exception($conn->error, $conn->errNo);
+        }
+
+        $stmt->execute();
+
+        if ($conn->error) {
+            throw new Exception($conn->error, $conn->errNo);
+        }
+
+        $result = $stmt->get_result();
+
+        while ($line = $result->fetch_array(MYSQLI_ASSOC)) {
+            array_push($array, $line);
+        }
+        $status = "OK";
+
+        $stmt->close();
+
+        array_unshift($array, array("status" => $status, "message" => "successful"));
+    } catch (Exception $e) {
+        $status = "ERROR";
+        $errorMessage = $e->getMessage();
+
+        array_unshift($array, array("status" => $status, "message" => $errorMessage));
+    }
+
+    echo json_encode($array);
+}
+
+function lookupRecipient()
+{
+
+    $conn = getConnection();
+
+    if (!$conn) {
+        echo errorResponse();
+        return;
+    }
+
+    $array = array();
+
+    # get first and last name pattern
+    $firstName = $_POST["recipient_first_name"] . "%";
+    $lastName = $_POST["recipient_last_name"] . "%";
+
+    try {
+        $sql = "
+  SELECT r.recipient_id
+        ,r.first_name
+        ,r.middle_initial
+        ,r.last_name
+        ,f.name facility_name
+        ,r.address_01
+        ,r.address_02
+        ,r.city
+        ,r.state
+        ,r.zip_code
+        ,r.phone
+        ,r.dorm
+    FROM wp_ndic_recipient r
+    LEFT OUTER JOIN wp_ndic_facility f
+      ON f.facility_id = r.facility_id
+   WHERE upper( r.first_name ) like upper( '$firstName' ) 
+     and upper( r.last_name ) like upper( '$lastName' ) 
+   ORDER BY
+         r.last_name, r.first_name
+   ";
 
         $stmt = $conn->prepare($sql);
 

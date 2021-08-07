@@ -125,6 +125,55 @@ function eventRequestsChange() {
    _unsavedData = true;
 }
 
+function eventRequestsFirstOrLastNameChange() {
+   console.log("eventRequestsFirstOrLastNameChange");
+   eventRequestsChange()
+
+   // if both fields have a value, do a lookup
+   firstName = jQuery("#ndic_recipientFirstName").val();
+   lastName = jQuery("#ndic_recipientLastName").val();
+
+   if (firstName > "" && lastName > "") {
+      console.log(firstName + " " + lastName)
+      pos = jQuery("#ndic_recipientLastName").position();
+      height = jQuery("#ndic_recipientLastName").height();
+
+      // see if any recipient names match
+      jQuery.ajax({
+         method: "POST",
+         url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+         data: {
+            service: "lookupRecipient"
+            , recipient_first_name: firstName
+            , recipient_last_name: lastName
+         }
+      })
+         .done(function (json) {
+            actionEnded();
+            //console.log(json);
+            res = JSON.parse(json);
+
+            if (res[0].status != "OK") {
+               setError(res[0].message)
+            }
+            else {
+               if (res.length > 1) {
+                  var html = "";
+                  for (var i = 1; i < res.length; i++) {
+                     html += "<span>" + res[i].recipient_id + "<span>";
+                     html += "<span>" + res[i].first_name + " " + res[i].last_name + "</span>";
+                     html += "<br />";
+                  }
+               }
+
+               jQuery("#ndic_requestsPopUp").html(html);
+               jQuery("#ndic_requestsPopUp").css({ top: pos.top + height + 10, left: pos.left - 100, position: 'absolute' });
+               requestsPopUp()
+            }
+         });
+   }
+}
+
 // render functions
 function renderRequestsList() {
    console.log("renderRequestsList");
@@ -199,8 +248,10 @@ function renderRequestsEntry() {
                </div> \
                <div class=ndic_button_row> \
                   <button class=ndic_button id=ndic_requestAddBtn>Add Request</button> \
+                  <button class=ndic_button id=ndic_requestTestBtn>Test</button> \
                   <div class=ndic_form_label>* = Required</div> \
             </div> \
+            <div id=ndic_requestsPopUp class=popUp>Hello World</div> \
       " );
 
    // setup field masks
@@ -208,6 +259,11 @@ function renderRequestsEntry() {
    jQuery('.ndic_zip_code').mask('00000-ZZZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
 
    setupEvent("#ndic_requestsEntry input", "change", eventRequestsChange);
+
+   setupEvent("#ndic_recipientFirstName", "change", eventRequestsFirstOrLastNameChange);
+   setupEvent("#ndic_recipientLastName", "change", eventRequestsFirstOrLastNameChange);
+
+   setupEvent("#ndic_requestTestBtn", "click", requestsPopUp);
 }
 
 function renderRequestsTable() {
@@ -265,9 +321,9 @@ function renderRequestsTable() {
                   + res[i].request_id + "'>edit</a> | ";
                html += "<a href='#' class='deleteRequest' request_id='"
                   + res[i].request_id + "'>delete</a></td>";
-               html += "<td class=recipientName>" + res[i].first_name + " " 
-                                                  + res[i].middle_initial + " " 
-                                                  + res[i].last_name + "</td>";
+               html += "<td class=recipientName>" + res[i].first_name + " "
+                  + res[i].middle_initial + " "
+                  + res[i].last_name + "</td>";
                html += "<td class=recipientSpin>" + res[i].spin + "</td>";
                html += "<td class=recipientFacility>" + res[i].facility_name + "</td>";
                html += "<td><span class=recipientAddress01>" + res[i].address_01 + "</span> "
@@ -298,6 +354,11 @@ function renderRequestsTable() {
             // setupEvent(".deleteRequest", "click", eventRequestDelete)
          }
       });
+}
+
+function requestsPopUp() {
+   console.log("requestPopUp ***************************************");
+   jQuery("#ndic_requestsPopUp").show();
 }
 
 
