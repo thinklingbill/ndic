@@ -404,9 +404,9 @@ function addRequest()
         // ndic_requestDuplicateFlag
         // ndic_requestDetails
 
-HERE: NEED TO STORE RECIPIENT IF IT ISN'T AN EXISTING ONE, THEN SAVE 
-REQUEST
-        
+// HERE: NEED TO STORE RECIPIENT IF IT ISN'T AN EXISTING ONE, THEN SAVE 
+// REQUEST
+
         $sql = "
         INSERT INTO ndic.wp_ndic_facility
         (name,

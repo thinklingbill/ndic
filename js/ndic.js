@@ -333,8 +333,8 @@ function eventRequestAdd() {
             }
             else {
                resetChangedFlag();
-               eventMenuFacilitiesList();
-               informTheUser("Facility saved")
+               eventMenuRequestsList();
+               informTheUser("Request saved")
             }
 
          });
@@ -402,11 +402,20 @@ function validateRequestData() {
 function renderRequestsList() {
    console.log("renderRequestsList");
 
+   // get current date
+   var today = new Date();
+
+   var dd = String(today.getDate()).padStart(2, '0');
+   var mm = String(today.getMonth() + 1).padStart(2, '0');
+   var yyyy = today.getFullYear();
+
+   var todayStr = mm + "/" + dd + "/" + yyyy;
+
    jQuery("#ndic_requestsPage").html(" \
    <div> \
       <div class=ndic_filter>Date Range: \
-            <input id=ndic_filterDateRangeStart class=ndic_form_entry_small value='07/02/2021'></input> \
-            <input id=ndic_filterDateRangeEnd class=ndic_form_entry_small value='07/02/2021'></input> \
+            <input id=ndic_filterDateRangeStart class='ndic_form_entry_small datepicker' value='" + todayStr + "'></input> \
+            <input id=ndic_filterDateRangeEnd class='ndic_form_entry_small datepicker' value='" + todayStr + "'></input> \
             <input type=checkbox id=ndic_requestOnlyMyRequests></input> <span>Only Show My Requests</span> \
             <button class=ndic_button id=ndic_retrieveDateRangeBtn>Retrieve</button> \
       </div> \
@@ -421,6 +430,11 @@ function renderRequestsList() {
    renderRequestsEntry();
 
    renderRequestsTable();
+
+   jQuery(".datepicker").datepicker({
+      dateFormat: "mm/dd/yy"
+   }
+   );
 }
 
 function renderRequestsEntry() {
@@ -1269,6 +1283,5 @@ function actionEnded() {
 ///////////////////////////////
 console.log("Main Program");
 jQuery(document).ready(function () {
-
    renderMenu();
 });
