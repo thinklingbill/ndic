@@ -159,6 +159,118 @@ function eventRequestsFirstOrLastNameChange() {
             else {
                if (res.length > 1) {
                   var html = "";
+                  html += "<strong>Matching ID #(s) or Name(s) found:</strong><br />"
+                       + "Please select match or press \"don't select\" if this is not a duplicate<br />"
+                  for (var i = 1; i < res.length; i++) {
+                     html += "<span class=ndic_hidden id=ndic_popUpRecipientId>"
+                        + res[i].recipient_id
+                        + "</span>";
+                     html += "<span><a href='#'>"
+                        + res[i].spin
+                        + ": " + res[i].first_name
+                        + " " + res[i].middle_initial
+                        + " " + res[i].last_name
+                        + " " + res[i].address_01
+                        + " " + res[i].address_02
+                        + " " + res[i].city
+                        + " " + res[i].state
+                        + " " + res[i].zip_code
+                        + " " + "last request:" + res[i].last_request_date
+                        + "</span>";
+                     html += "<br />";
+                  }
+               }
+
+               html += "<br /><a href='#' id='ndic_popUpDontSelect'>don't select</a>"
+               console.log(html);
+               jQuery("#ndic_requestsPopUp").html(html);
+               jQuery("#ndic_requestsPopUp").css({ top: pos.top + height + 10, left: pos.left - 150, position: 'absolute' });
+
+               setupEvent("#ndic_popUpDontSelect", "click", requestsPopUpClose);
+
+               requestsPopUp()
+            }
+         });
+   }
+}
+
+function eventRequestsFacilityMatchTextChange() {
+   console.log("eventRequestsFacilityMatchTextChange");
+   eventRequestsChange()
+
+   // if both fields have a value, do a lookup
+   facilityMatchText = jQuery("#ndic_recipientFacilityMatchText").val();
+
+   if (facilityMatchText > "") {
+      pos = jQuery("#ndic_recipientFacilityMatchText").position();
+      height = jQuery("#ndic_recipientFacilityMatchText").height();
+
+      // see if any recipient names match
+      jQuery.ajax({
+         method: "POST",
+         url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+         data: {
+            service: "lookupFacility"
+            , facility_match_text: facilityMatchText
+         }
+      })
+         .done(function (json) {
+            actionEnded();
+            //console.log(json);
+            res = JSON.parse(json);
+
+            if (res[0].status != "OK") {
+               setError(res[0].message)
+            }
+            else {
+               if (res.length > 1) {
+                  var html = "";
+                  for (var i = 1; i < res.length; i++) {
+                     html += "<span>" + res[i].facility_id + "<span>";
+                     html += "<span>" + res[i].facility_name + "</span>";
+                     html += "<br />";
+                  }
+               }
+
+               jQuery("#ndic_requestsPopUp").html(html);
+               jQuery("#ndic_requestsPopUp").css({ top: pos.top + height + 10, left: pos.left - 100, position: 'absolute' });
+               requestsPopUp()
+            }
+         });
+   }
+}
+
+function eventRequestsFriendMatchTextChange() {
+   console.log("eventRequestsFriendMatchTextChange");
+   eventRequestsChange()
+
+   // if both fields have a value, do a lookup
+   friendMatchText = jQuery("#ndic_recipientFriendMatchText").val();
+
+   if (friendMatchText > "") {
+      pos = jQuery("#ndic_recipientFriendMatchText").position();
+      height = jQuery("#ndic_recipientFriendMatchText").height();
+
+      // see if any recipient names match
+      jQuery.ajax({
+         method: "POST",
+         url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+         data: {
+            service: "lookupRecipientFriend"
+            , friend_match_text: friendMatchText
+         }
+      })
+         .done(function (json) {
+            actionEnded();
+            //console.log(json);
+            res = JSON.parse(json);
+
+            if (res[0].status != "OK") {
+               setError(res[0].message)
+            }
+            else {
+               if (res.length > 1) {
+                  var html = "";
                   for (var i = 1; i < res.length; i++) {
                      html += "<span>" + res[i].recipient_id + "<span>";
                      html += "<span>" + res[i].first_name + " " + res[i].last_name + "</span>";
@@ -172,6 +284,118 @@ function eventRequestsFirstOrLastNameChange() {
             }
          });
    }
+}
+
+function eventRequestAdd() {
+   console.log("eventRequestAdd");
+
+   // validate that the request data is good
+   if (validateRequestData()) {
+      // call the service to add request data
+      actionStarted();
+      jQuery.ajax({
+         method: "POST",
+         url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+         data: {
+            service: "addRequest",
+            ndic_recipientFirstName: jQuery("#ndic_recipientFirstName").val(),
+            ndic_recipientMI: jQuery("#ndic_recipientMI").val(),
+            ndic_recipientSuffix: jQuery("#ndic_recipientSuffix").val(),
+            ndic_recipientSpin: jQuery("#ndic_recipientSpin").val(),
+            ndic_recipientFacilityId: jQuery("#ndic_recipientFacilityId").val(),
+            ndic_recipientUseFacilityAddress: jQuery("#ndic_recipientUseFacilityAddress").is(':checked'),
+            ndic_recipientAddress01: jQuery("#ndic_recipientAddress01").val(),
+            ndic_recipientAddress01: jQuery("#ndic_recipientAddress02").val(),
+            ndic_recipientCity: jQuery("#ndic_recipientCity").val(),
+            ndic_recipientState: jQuery("#ndic_recipientState").val(),
+            ndic_recipientZipCode: jQuery("#ndic_recipientZipCode").val(),
+            ndic_recipientDorm: jQuery("#ndic_recipientDorm").val(),
+            ndic_requestRequestingFriendId: jQuery("#ndic_requestRequestingFriendId").val(),
+            ndic_requestNoSpiralFlag: jQuery("#ndic_requestNoSpiralFlag").is(':checked'),
+            ndic_requestInTouchFlag: jQuery("#ndic_requestInTouchFlag").is(':checked'),
+            ndic_requestPrayerRequestFlag: jQuery("#ndic_requestPrayerRequestFlag").is(':checked'),
+            ndic_requestBibleRequestFlag: jQuery("#ndic_requestBibleRequestFlag").is(':checked'),
+            ndic_requestSpanishFlag: jQuery("#ndic_requestSpanishFlag").is(':checked'),
+            ndic_requestNoDevotionalFlag: jQuery("#ndic_requestNoDevotionalFlag").is(':checked'),
+            ndic_requestDuplicateFlag: jQuery("#ndic_requestDuplicateFlag").is(':checked'),
+            ndic_requestDetails: jQuery("#ndic_requestDetails").val(),
+         }
+      })
+         .done(function (json) {
+            actionEnded();
+            //console.log( json );
+            res = JSON.parse(json);
+
+            //console.log( res );
+
+            if (res.status != "OK") {
+               setError(res.message)
+            }
+            else {
+               resetChangedFlag();
+               eventMenuFacilitiesList();
+               informTheUser("Facility saved")
+            }
+
+         });
+   }
+}
+
+function eventRequestUpdate() {
+   console.log("eventRequestUpdate");
+
+   // validate that the facility data is good
+   if (validateFacilityData()) {
+      // call the service to add facility data
+      actionStarted();
+      jQuery.ajax({
+         method: "POST",
+         url: "/ndic/wp-content/plugins/ndic_devotional_calendar/services/ndicService.php",
+         data: {
+            service: "updateFacility",
+            ndic_facilityId: jQuery("#ndic_facilityId").val(),
+            ndic_facilityName: jQuery("#ndic_facilityName").val(),
+            ndic_facilityAlias01: jQuery("#ndic_facilityAlias01").val(),
+            ndic_facilityAlias02: jQuery("#ndic_facilityAlias02").val(),
+            ndic_facilityAlias03: jQuery("#ndic_facilityAlias03").val(),
+            ndic_facilityAlias04: jQuery("#ndic_facilityAlias04").val(),
+            ndic_facilityType: jQuery("#ndic_facilityType").val(),
+            ndic_facilityAddress01: jQuery("#ndic_facilityAddress01").val(),
+            ndic_facilityAddress02: jQuery("#ndic_facilityAddress02").val(),
+            ndic_facilityCity: jQuery("#ndic_facilityCity").val(),
+            ndic_facilityState: jQuery("#ndic_facilityState").val(),
+            ndic_facilityZipCode: jQuery("#ndic_facilityZipCode").val(),
+            ndic_facilityWardenName: jQuery("#ndic_facilityWardenName").val(),
+            ndic_facilityChaplainName: jQuery("#ndic_facilityChaplainName").val(),
+            ndic_facilityTelephone: jQuery("#ndic_facilityTelephone").val(),
+            ndic_facilityDontSend: jQuery('#ndic_facilityDontSend').is(':checked'),
+         }
+      })
+         .done(function (json) {
+            actionEnded();
+            //console.log( json );
+            res = JSON.parse(json);
+
+            //console.log( res );
+
+            if (res.status != "OK") {
+               setError(res.message)
+            }
+            else {
+               resetChangedFlag();
+               eventMenuFacilitiesList();
+               informTheUser("Facility saved")
+            }
+
+         });
+   }
+}
+
+///////////////////////////////
+// Request validation functions
+///////////////////////////////
+function validateRequestData() {
+   return true;
 }
 
 // render functions
@@ -230,7 +454,7 @@ function renderRequestsEntry() {
                </div> \
                <div class=ndic_form_row> \
                   <span class=ndic_form_label>Dorm:</span> <input id=ndic_recipientDorm class=ndic_form_entry_medium></input> \
-                  <span class=ndic_form_label_not_padded>Friend of: <i>Match text**</i>:</span> <input id=ndic_recipientFriendOf class=ndic_form_entry_medium></input> \
+                  <span class=ndic_form_label_not_padded>Friend of: <i>Match text**</i>:</span> <input id=ndic_recipientFriendMatchText class=ndic_form_entry_medium></input> \
                </div> \
                <div class=ndic_form_row> \
                   <span class=ndic_form_label>Options:</span> \
@@ -248,7 +472,7 @@ function renderRequestsEntry() {
                </div> \
                <div class=ndic_button_row> \
                   <button class=ndic_button id=ndic_requestAddBtn>Add Request</button> \
-                  <button class=ndic_button id=ndic_requestTestBtn>Test</button> \
+                  <button class=ndic_button id=ndic_requestAddReuseBtn>Add Request, Reuse Address on Next</button> \
                   <div class=ndic_form_label>* = Required</div> \
             </div> \
             <div id=ndic_requestsPopUp class=popUp>Hello World</div> \
@@ -262,8 +486,10 @@ function renderRequestsEntry() {
 
    setupEvent("#ndic_recipientFirstName", "change", eventRequestsFirstOrLastNameChange);
    setupEvent("#ndic_recipientLastName", "change", eventRequestsFirstOrLastNameChange);
+   setupEvent("#ndic_recipientFacilityMatchText", "change", eventRequestsFacilityMatchTextChange);
+   setupEvent("#ndic_recipientFriendMatchText", "change", eventRequestsFriendMatchTextChange);
 
-   setupEvent("#ndic_requestTestBtn", "click", requestsPopUp);
+   // setupEvent("#ndic_requestAddBtn", "click", herio);
 }
 
 function renderRequestsTable() {
@@ -360,6 +586,12 @@ function requestsPopUp() {
    console.log("requestPopUp ***************************************");
    jQuery("#ndic_requestsPopUp").show();
 }
+
+function requestsPopUpClose() {
+   console.log("requestPopUpClose");
+   jQuery("#ndic_requestsPopUp").hide();
+}
+
 
 
 ///////////////////////////////
