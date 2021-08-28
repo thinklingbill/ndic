@@ -26,10 +26,9 @@ switch ($requestedService) {
         deleteFacility();
         break;
 
-    case "addRequest":
-        addRequest();
+    case "addOrUpdateRequest":
+        addOrUpdateRequest();
         break;
-
 
     case "getRequests":
         getRequests();
@@ -37,6 +36,10 @@ switch ($requestedService) {
 
     case "lookupRecipient":
         lookupRecipient();
+        break;
+
+    case "lookupSpin":
+        lookupSpin();
         break;
 
     case "lookupFacility":
@@ -321,7 +324,7 @@ function deleteFacility()
     echo json_encode($array);
 }
 
-function addRequest()
+function addOrUpdateRequest()
 {
 
     $conn = getConnection();
@@ -382,85 +385,168 @@ function addRequest()
             $ndic_requestDuplicateFlag = "N";
         }
 
-        // ndic_recipientFirstName
-        // ndic_recipientMI
-        // ndic_recipientSuffix
-        // ndic_recipientSpin
-        // ndic_recipientFacilityId
-        // ndic_recipientUseFacilityAddress
-        // ndic_recipientAddress01
-        // ndic_recipientAddress01
-        // ndic_recipientCity
-        // ndic_recipientState
-        // ndic_recipientZipCode
-        // ndic_recipientDorm
-        // ndic_requestRequestingFriendId
-        // ndic_requestNoSpiralFlag
-        // ndic_requestInTouchFlag
-        // ndic_requestPrayerRequestFlag
-        // ndic_requestBibleRequestFlag
-        // ndic_requestSpanishFlag
-        // ndic_requestNoDevotionalFlag
-        // ndic_requestDuplicateFlag
-        // ndic_requestDetails
-
-// HERE: NEED TO STORE RECIPIENT IF IT ISN'T AN EXISTING ONE, THEN SAVE 
-// REQUEST
-
-        $sql = "
-        INSERT INTO ndic.wp_ndic_facility
-        (name,
-         type,
-         address_01,
-         address_02,
-         city,
-         state,
-         zip_code,
-         warden_name,
-         chaplain_name,
-         phone,
-         alias_01,
-         alias_02,
-         alias_03,
-         alias_04,
-         devotional_send_disallowed_flag,
-         deleted_flag,
-         create_date,
-         create_user_id,
-         modify_date,
-         modify_user_id)
-        VALUES
-        ('" . $_POST["ndic_facilityName"] . "',
-         '" . $_POST["ndic_facilityType"] . "',
-         '" . $_POST["ndic_facilityAddress01"] . "',
-         '" . $_POST["ndic_facilityAddress02"] . "',
-         '" . $_POST["ndic_facilityCity"] . "',
-         '" . $_POST["ndic_facilityState"] . "',
-         '" . $_POST["ndic_facilityZipCode"] . "',
-         '" . $_POST["ndic_facilityWardenName"] . "',
-         '" . $_POST["ndic_facilityChaplainName"] . "',
-         '" . $_POST["ndic_facilityTelephone"] . "',
-         '" . $_POST["ndic_facilityAlias01"] . "',
-         '" . $_POST["ndic_facilityAlias02"] . "',         
-         '" . $_POST["ndic_facilityAlias03"] . "',         
-         '" . $_POST["ndic_facilityAlias04"] . "',         
-         '" . $dontSend . "',
-         'N', now(), 0, now(), 0 )";
-
-        $stmt = $conn->prepare($sql);
-
-        $stmt->execute();
-
-        if ($conn->error) {
-            throw new Exception($conn->error, $conn->errNo);
+        if ($_POST["ndic_recipientFacilityId"] == "") {
+            $facilityId = 0;
+        } else {
+            $facilityId = $_POST["ndic_recipientFacilityId"];
         }
-        $insertedId = $conn->insert_id;
+
+        if ($facilityId == 0) {
+            $inJailFlag = 'N';
+        } else {
+            $inJailFlag = 'Y';
+        }
+
+        // if recipient id is 0, insert into recipient table, else
+        // update the recipient table
+        if ($_POST["ndic_recipientId"] == 0) {
+            $sql = "
+        INSERT INTO ndic.wp_ndic_recipient\n
+             (\n
+             first_name,\n
+             middle_initial,\n
+             last_name,\n
+             suffix,\n
+             spin,\n
+             in_jail_flag,\n
+             facility_id,\n
+             use_facility_address_flag,\n
+             address_01,\n
+             address_02,\n
+             city,\n
+             state,\n
+             zip_code,\n
+             phone,\n
+             dorm,\n
+             deleted_flag,\n
+             create_date,\n
+             create_user_id,\n
+             modify_date,\n
+             modify_user_id\n
+             )\n
+             VALUES\n
+             (\n
+             '" . $_POST["ndic_recipientFirstName"] . "',\n
+             '" . $_POST["ndic_recipientMI"] . "',\n
+             '" . $_POST["ndic_recipientLastName"] . "',\n
+             '" . $_POST["ndic_recipientSuffix"] . "',\n
+             '" . $_POST["ndic_recipientSpin"] . "',\n
+             '" . $inJailFlag . "',\n
+             " . $facilityId . ",\n
+             '" . $ndic_recipientUseFacilityAddress . "',\n
+             '" . $_POST["ndic_recipientAddress01"] . "',\n
+             '" . $_POST["ndic_recipientAddress02"] . "',\n
+             '" . $_POST["ndic_recipientCity"] . "',\n
+             '" . $_POST["ndic_recipientState"] . "',\n
+             '" . $_POST["ndic_recipientZipCode"] . "',\n
+             " . "null" . ",\n
+             '" . $_POST["ndic_recipientDorm"] . "',\n
+             'N',\n
+             now(),\n
+             0,\n
+             now(),\n
+             0)";
+
+            $stmt = $conn->prepare($sql);
+
+            $stmt->execute();
+
+            if ($conn->error) {
+                throw new Exception($conn->error, $conn->errNo);
+            }
+            // get inserted id
+            $insertedId = $conn->insert_id;
+            $recipientId = $insertedId;
+        }
+
+        // either insert or update the request id depending on if the
+        // request id is 0 or > 0
+        if ($_POST["ndic_requestId"] == 0) {
+            $sql = "
+            INSERT INTO ndic.wp_ndic_request
+            (
+            recipient_id,
+            facility_id,
+            request_date,
+            first_name,
+            middle_initial,
+            last_name,
+            suffix,
+            spin,
+            in_jail_flag,
+            use_facility_address_flag,
+            address_01,
+            address_02,
+            city,
+            state,
+            zip_code,
+            phone,
+            dorm,
+            no_spiral_flag,
+            in_touch_flag,
+            prayer_request_flag,
+            bible_request_flag,
+            spanish_flag,
+            no_devotional_flag,
+            duplicate_flag,
+            details,
+            requesting_friend_id,
+            deleted_flag,
+            create_date,
+            create_user_id,
+            modify_date,
+            modify_user_id)
+            VALUES
+            (
+            $recipientId,
+            $facilityId,
+            curdate(),
+            '". $_POST["ndic_recipientFirstName"] ."',
+            '". $_POST["ndic_recipientMI"] ."',
+            '". $_POST["ndic_recipientLastName"] ."',
+            '". $_POST["ndic_recipientSuffix"] ."',
+            '". $_POST["ndic_recipientSpin"] ."',
+            '$inJailFlag',
+            '$ndic_recipientUseFacilityAddress',
+            '". $_POST["ndic_recipientAddress01"] ."',
+            '". $_POST["ndic_recipientAddress02"] ."',
+            '". $_POST["ndic_recipientCity"] ."',
+            '". $_POST["ndic_recipientState"] ."',
+            '". $_POST["ndic_recipientZipCode"] ."',
+            null,
+            '". $_POST["ndic_recipientDorm"] ."',
+            '$ndic_requestNoSpiralFlag',
+            '$ndic_requestInTouchFlag',
+            '$ndic_requestPrayerRequestFlag',
+            '$ndic_requestBibleRequestFlag',
+            '$ndic_requestSpanishFlag',
+            '$ndic_requestNoDevotionalFlag',
+            '$ndic_requestDuplicateFlag',
+            '". $_POST["ndic_requestDetails"] ."',
+            ". $_POST["ndic_requestRequestingFriendId"] .",
+             'N',\n
+             now(),\n
+             0,\n
+             now(),\n
+             0)";
+
+            $stmt = $conn->prepare($sql);
+
+            $stmt->execute();
+
+            if ($conn->error) {
+                throw new Exception($conn->error, $conn->errNo);
+            }
+            // get inserted id
+            $insertedId = $conn->insert_id;
+            $requestId = $insertedId;
+        }
 
         $status = "OK";
 
         $stmt->close();
 
-        echo json_encode(array("status" => $status, "inserted_id" => $insertedId));
+        echo json_encode(array("status" => $status, "recipient_id" => $recipientId, "request_id" => $requestId ));
     } catch (Exception $e) {
         $status = "ERROR";
         $errorMessage = $e->getMessage();
@@ -537,7 +623,7 @@ function getRequests()
    WHERE request_date between str_to_date( '$startDate', '%m/%d/%Y' ) 
                           and str_to_date( '$endDate', '%m/%d/%Y' )
    ORDER BY
-         rq.create_date
+         rq.create_date desc
    ";
 
         $stmt = $conn->prepare($sql);
@@ -613,6 +699,84 @@ function lookupRecipient()
       on rq.recipient_id = r.recipient_id
    WHERE upper( r.first_name ) like upper( '$firstName' ) 
      and upper( r.last_name ) like upper( '$lastName' )
+) t 
+ WHERE t.pref = 1 
+ ORDER BY
+       t.last_name, t.first_name
+   ";
+
+        $stmt = $conn->prepare($sql);
+
+        if (!$stmt) {
+            throw new Exception($conn->error, $conn->errNo);
+        }
+
+        $stmt->execute();
+
+        if ($conn->error) {
+            throw new Exception($conn->error, $conn->errNo);
+        }
+
+        $result = $stmt->get_result();
+
+        while ($line = $result->fetch_array(MYSQLI_ASSOC)) {
+            array_push($array, $line);
+        }
+        $status = "OK";
+
+        $stmt->close();
+
+        array_unshift($array, array("status" => $status, "message" => "successful"));
+    } catch (Exception $e) {
+        $status = "ERROR";
+        $errorMessage = $e->getMessage();
+
+        array_unshift($array, array("status" => $status, "message" => $errorMessage));
+    }
+
+    echo json_encode($array);
+}
+
+
+function lookupSpin()
+{
+
+    $conn = getConnection();
+
+    if (!$conn) {
+        echo errorResponse();
+        return;
+    }
+
+    $array = array();
+
+    # get spin
+    $spin = $_POST["recipient_spin"];
+
+    try {
+        $sql = "
+  SELECT * FROM (      
+  SELECT r.recipient_id
+        ,r.spin
+        ,r.first_name
+        ,r.middle_initial
+        ,r.last_name
+        ,f.name facility_name
+        ,r.address_01
+        ,r.address_02
+        ,r.city
+        ,r.state
+        ,r.zip_code
+        ,r.phone
+        ,r.dorm
+        ,date_format(rq.request_date,'%m/%d/%y') as last_request_date
+        ,row_number() over ( partition by rq.recipient_id order by rq.request_date desc ) pref
+    FROM wp_ndic_recipient r
+    LEFT OUTER JOIN wp_ndic_facility f
+      ON f.facility_id = r.facility_id
+    JOIN wp_ndic_request rq
+      on rq.recipient_id = r.recipient_id
+   WHERE r.spin = '$spin'
 ) t 
  WHERE t.pref = 1 
  ORDER BY
@@ -730,19 +894,32 @@ function lookupRecipientFriend()
 
     try {
         $sql = "
-  SELECT r.recipient_id
-        ,r.first_name
-        ,r.middle_initial
-        ,r.last_name
-        ,r.address_01
-        ,r.address_02
-        ,r.city
-        ,r.state
-        ,r.zip_code
-    FROM wp_ndic_recipient r
-   WHERE upper( concat( r.first_name, ' ', r.last_name ) ) like upper( '$friendMatchText' ) 
-   ORDER BY
-         r.last_name, r.first_name
+        SELECT * FROM (      
+            SELECT r.recipient_id
+                  ,r.spin
+                  ,r.first_name
+                  ,r.middle_initial
+                  ,r.last_name
+                  ,f.name facility_name
+                  ,r.address_01
+                  ,r.address_02
+                  ,r.city
+                  ,r.state
+                  ,r.zip_code
+                  ,r.phone
+                  ,r.dorm
+                  ,date_format(rq.request_date,'%m/%d/%y') as last_request_date
+                  ,row_number() over ( partition by rq.recipient_id order by rq.request_date desc ) pref
+              FROM wp_ndic_recipient r
+              LEFT OUTER JOIN wp_ndic_facility f
+                ON f.facility_id = r.facility_id
+              JOIN wp_ndic_request rq
+                on rq.recipient_id = r.recipient_id
+             WHERE upper( concat( r.first_name, ' ', r.last_name ) ) like upper( '$friendMatchText' ) 
+                ) t 
+           WHERE t.pref = 1 
+           ORDER BY
+                 t.last_name, t.first_name
    ";
 
         $stmt = $conn->prepare($sql);

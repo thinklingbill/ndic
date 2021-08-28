@@ -1,7 +1,7 @@
 DROP TABLE wp_ndic_request;
 
 CREATE TABLE wp_ndic_request (
-  request_id int(11) NOT NULL DEFAULT 0,
+  request_id int(11) NOT NULL AUTO_INCREMENT,
   recipient_id int(11) NOT NULL DEFAULT 0,
   facility_id int(11) NOT NULL DEFAULT 0,
   request_date datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
